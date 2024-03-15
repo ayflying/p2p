@@ -1,3 +1,3 @@
-module gitea.com/ayflying/p2p.git
+module github.com/ayflying/p2p
 
 go 1.22.0
