@@ -217,7 +217,7 @@ func (s *sP2P) handleDiscover(conn *websocket.Conn, msg GatewayMessage) {
 	fromClient.LastActive = time.Now()
 	s.lock.Unlock()
 
-	if targetClient != nil {
+	if targetClient == nil {
 		// 目标不存在
 		s.sendMessage(conn, GatewayMessage{
 			Type: MsgTypeDiscoverAck,
@@ -237,10 +237,10 @@ func (s *sP2P) handleDiscover(conn *websocket.Conn, msg GatewayMessage) {
 		From: "gateway", // 发送方是网关
 		To:   msg.From,  // 接收方是原请求方
 		Data: gjson.MustEncode(g.Map{
-			"found":   true,
-			"peer_id": targetClient.PeerID,
-			//"addrs":   s.getAddrsJSON(targetClient.Addrs),
-			"addrs": targetClient.Addrs,
+			"found":     true,
+			"peer_id":   targetClient.PeerID,
+			"addrs":     targetClient.Addrs,
+			"target_id": data.TargetID,
 		}),
 	})
 
