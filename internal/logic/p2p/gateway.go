@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -110,6 +111,22 @@ func (s *sP2P) handleRegister(conn *websocket.Conn, msg GatewayMessage) {
 		s.sendError(conn, "注册数据格式错误")
 		return
 	}
+
+	// 追加公网ip
+	publicIp, _, _ := net.SplitHostPort(conn.RemoteAddr().String())
+	ParseIP := net.ParseIP(publicIp)
+	var ipType string
+	if ParseIP.To4() != nil {
+		ipType = "ip4"
+	} else {
+		ipType = "ip6"
+	}
+	port2 := 53533
+	data.Addrs = append(data.Addrs, fmt.Sprintf("/%s/%s/tcp/%d", ipType, publicIp, port2))
+	data.Addrs = append(data.Addrs, fmt.Sprintf("/%s/%s/udp/%d/quic-v1", ipType, publicIp, port2))
+
+	// 过滤回环地址
+	data.Addrs = s.filterLoopbackAddrs(data.Addrs)
 
 	// 保存客户端信息
 	client := &ClientConn{
@@ -253,7 +270,7 @@ func (s *sP2P) handleDiscover(conn *websocket.Conn, msg GatewayMessage) {
 			"from_id": msg.From,
 			"peer_id": fromClient.PeerID,
 			//"addrs":   s.getAddrsJSON(fromClient.Addrs),
-			"addrs": targetClient.Addrs,
+			"addrs": fromClient.Addrs,
 		}),
 	})
 }

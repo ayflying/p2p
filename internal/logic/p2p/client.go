@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/gogf/gf/v2/encoding/gjson"
@@ -48,7 +49,6 @@ func (s *sP2P) Start(ctx context.Context, wsStr string) (err error) {
 		peers:      make(map[string]peer.ID),
 	}
 
-	g.Log().Debugf(ctx, "当前p2p的分享地址：%v", hostObj.Addrs())
 	// 设置流处理函数（处理P2P消息）
 	hostObj.SetStreamHandler(ProtocolID, s.handleStream)
 
@@ -71,17 +71,29 @@ func (s *sP2P) Start(ctx context.Context, wsStr string) (err error) {
 
 // 创建libp2p主机
 func (s *sP2P) createLibp2pHost(ctx context.Context, port int) (host.Host, error) {
+	if port == 0 {
+		//port = grand.N(50000, 55000)
+		port = 53533
+	}
 	// 配置监听地址
 	//listenAddr := fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port)
-
+	var listenAddrs = []string{
+		fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port),
+		fmt.Sprintf("/ip4/0.0.0.0/udp/%d/quic-v1", port),
+	}
 	// 创建主机
 	h, err := libp2p.New(
-		////libp2p.ListenAddrStrings(listenAddr),
-		//libp2p.ListenAddrs(),
-		//libp2p.DefaultTransports,
-		//libp2p.DefaultMuxers,
-		//libp2p.DefaultSecurity,
+		libp2p.ListenAddrStrings(listenAddrs...),
+		libp2p.DefaultTransports,
+		libp2p.DefaultMuxers,
+		libp2p.DefaultSecurity,
+		// 增加NAT端口映射尝试时间
+		//libp2p.NATPortMapTimeout(30*time.Second),
+		// 禁用Relay（如果需要中继，可保留）
+		libp2p.DisableRelay(),
 	)
+	g.Log().Debugf(ctx, "当前p2p的分享地址：%v", h.Addrs())
+
 	return h, err
 }
 
@@ -89,24 +101,32 @@ func (s *sP2P) createLibp2pHost(ctx context.Context, port int) (host.Host, error
 func (s *sP2P) connectGateway() (err error) {
 	conn, _, err := websocket.DefaultDialer.Dial(s.client.gatewayURL, nil)
 	if err != nil {
+		gtimer.SetTimeout(ctx, 3*time.Minute, func(ctx context.Context) {
+			err = s.connectGateway()
+			return
+		})
 		return fmt.Errorf("WebSocket连接失败: %v", err)
 	}
 	//defer conn.Close()
 
 	s.client.wsConn = conn
+	g.Log().Infof(ctx, "已连接网关成功，客户端ID: %s", s.client.Id)
 
 	// 注册到网关
 	if err = s.register(); err != nil {
 		g.Log().Fatalf(ctx, "注册到网关失败: %v", err)
 	}
+
+	g.Log().Infof(ctx, "已注册到网关，客户端ID: %s", s.client.Id)
 	return
 }
 
 // 注册到网关
 func (s *sP2P) register() error {
+	selfAddrs := s.client.host.Peerstore().Addrs(s.client.host.ID())
 	// 收集地址信息
-	addrs := make([]string, len(s.client.host.Addrs()))
-	for i, addr := range s.client.host.Addrs() {
+	addrs := make([]string, len(selfAddrs))
+	for i, addr := range selfAddrs {
 		addrs[i] = addr.String()
 	}
 
@@ -245,7 +265,7 @@ func (s *sP2P) receiveGatewayMessages() {
 		if err != nil {
 			glog.Errorf(ctx, "接收网关消息失败: %v", err)
 
-			gtimer.SetTimeout(ctx, 5*time.Second, func(ctx context.Context) {
+			gtimer.SetTimeout(ctx, 30*time.Second, func(ctx context.Context) {
 				err = s.connectGateway()
 				return
 			})
@@ -331,4 +351,32 @@ func (s *sP2P) receiveGatewayMessages() {
 			glog.Errorf(ctx, "网关错误: %s", data.Error)
 		}
 	}
+}
+
+// 提取libp2p节点的本地TCP监听端口
+func (s *sP2P) getLocalTCPPorts(host host.Host) ([]int, error) {
+	ports := make(map[int]struct{}) // 去重
+
+	// 遍历所有本地监听地址
+	for _, addr := range host.Addrs() {
+		// 提取TCP端口
+		portStr, err := addr.ValueForProtocol(multiaddr.P_TCP)
+		if err != nil {
+			continue // 跳过非TCP地址
+		}
+
+		port, err := strconv.Atoi(portStr)
+		if err != nil {
+			continue
+		}
+
+		ports[port] = struct{}{}
+	}
+
+	// 转换为切片返回
+	result := make([]int, 0, len(ports))
+	for port := range ports {
+		result = append(result, port)
+	}
+	return result, nil
 }

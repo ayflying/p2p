@@ -77,6 +77,7 @@ var (
 				//addrs := "WyIvaXA0LzEyNy4wLjAuMS90Y3AvNTE4ODgiLCIvaXA0LzE5Mi4xNjguNTAuMTczL3RjcC81MTg4OCJd"
 				wsStr := "ws://192.168.50.173:51888/ws"
 				err = service.P2P().Start(ctx, wsStr)
+			case "dht":
 
 			default:
 				// 显示帮助信息
