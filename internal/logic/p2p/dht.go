@@ -9,7 +9,7 @@ import (
 )
 
 // 初始化无服务器DHT（作为节点加入DHT网络）
-func (s *sP2P) InitDHT(ctx context.Context, h host.Host) (*dht.IpfsDHT, error) {
+func (s *sP2P) DHTStart(ctx context.Context, h host.Host) (*dht.IpfsDHT, error) {
 	// 创建DHT实例，设置为“客户端+服务端模式”（既可以查找数据，也可以存储数据）
 	kdht, err := dht.New(ctx, h, dht.Mode(dht.ModeServer))
 	if err != nil {

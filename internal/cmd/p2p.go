@@ -53,7 +53,6 @@ var (
 				"g,gateway": true,
 				"a,action":  true,
 				"t,target":  true,
-				"m,message": true,
 			})
 
 			// 获取运行模式参数
@@ -78,12 +77,17 @@ var (
 				wsStr := "ws://192.168.50.173:51888/ws"
 				err = service.P2P().Start(ctx, wsStr)
 			case "dht":
+				h, _ := service.P2P().CreateLibp2pHost(ctx, 0)
+				service.P2P().DHTStart(ctx, h)
 
 			default:
 				// 显示帮助信息
 				g.Log().Info(ctx, p2pHelpDescription)
 			}
 
+			if err != nil {
+				return err
+			}
 			return
 		},
 	}

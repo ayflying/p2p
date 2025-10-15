@@ -34,7 +34,7 @@ type Client struct {
 
 func (s *sP2P) Start(ctx context.Context, wsStr string) (err error) {
 
-	hostObj, err := s.createLibp2pHost(ctx, 0)
+	hostObj, err := s.CreateLibp2pHost(ctx, 0)
 	if err != nil {
 		g.Log().Error(ctx, err)
 	}
@@ -70,7 +70,7 @@ func (s *sP2P) Start(ctx context.Context, wsStr string) (err error) {
 }
 
 // 创建libp2p主机
-func (s *sP2P) createLibp2pHost(ctx context.Context, port int) (host.Host, error) {
+func (s *sP2P) CreateLibp2pHost(ctx context.Context, port int) (host.Host, error) {
 	if port == 0 {
 		//port = grand.N(50000, 55000)
 		port = 53533
