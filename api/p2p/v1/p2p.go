@@ -18,3 +18,10 @@ type SendReq struct {
 type SendRes struct {
 	g.Meta `mime:"text/html" example:"string"`
 }
+
+type IpReq struct {
+	g.Meta `path:"/p2p/ip" tags:"p2p" method:"get" sm:"获取当前主机的IP地址"`
+}
+type IpRes struct {
+	g.Meta `mime:"text/html" example:"string"`
+}

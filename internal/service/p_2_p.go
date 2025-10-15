@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/gogf/gf/v2/net/ghttp"
-	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/libp2p/go-libp2p/core/host"
 )
 
@@ -23,8 +22,14 @@ type (
 		// 发送数据到目标节点
 		SendData(targetID string, data []byte) error
 		// 初始化无服务器DHT（作为节点加入DHT网络）
-		DHTStart(ctx context.Context, h host.Host) (*dht.IpfsDHT, error)
+		DHTStart(ctx context.Context, h host.Host) (err error)
+		// 存储数据到DHT（比如存储“目标节点ID-公网地址”的映射）
+		StoreAddrToDHT(ctx context.Context, key string, addr string) (err error)
+		// 从DHT查找数据（比如根据节点ID查找其公网地址）
+		FindAddrFromDHT(ctx context.Context, key string) (string, error)
 		GatewayStart(ctx context.Context, group *ghttp.RouterGroup) (err error)
+		// 只获取IPv4公网IP（过滤IPv6结果）
+		GetIPv4PublicIP() (string, error)
 	}
 )
 

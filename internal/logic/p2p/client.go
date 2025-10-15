@@ -12,13 +12,16 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtimer"
+	"github.com/gogf/gf/v2/util/grand"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/core/peerstore"
+	"github.com/libp2p/go-libp2p/core/protocol"
 	"github.com/multiformats/go-multiaddr"
 )
 
@@ -50,7 +53,7 @@ func (s *sP2P) Start(ctx context.Context, wsStr string) (err error) {
 	}
 
 	// 设置流处理函数（处理P2P消息）
-	hostObj.SetStreamHandler(ProtocolID, s.handleStream)
+	hostObj.SetStreamHandler(protocol.ID(ProtocolID), s.handleStream)
 
 	// 连接网关（WebSocket）
 	if err = s.connectGateway(); err != nil {
@@ -72,18 +75,23 @@ func (s *sP2P) Start(ctx context.Context, wsStr string) (err error) {
 // 创建libp2p主机
 func (s *sP2P) CreateLibp2pHost(ctx context.Context, port int) (host.Host, error) {
 	if port == 0 {
-		//port = grand.N(50000, 55000)
-		port = 53533
+		port = grand.N(50000, 55000)
+		//port = 53533
 	}
 	// 配置监听地址
 	//listenAddr := fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port)
 	var listenAddrs = []string{
-		fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port),
-		fmt.Sprintf("/ip4/0.0.0.0/udp/%d/quic-v1", port),
+		fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port),         // 随机 TCP 端口
+		fmt.Sprintf("/ip4/0.0.0.0/udp/%d/quic-v1", port), // 随机 UDP 端口（QUIC 协议，提升打洞成功率）
 	}
+
+	// 1. 生成密钥对并初始化节点（确保身份有效）
+	s.privKey, _, _ = crypto.GenerateKeyPair(crypto.Ed25519, 0) // 推荐使用Ed25519
+
 	// 创建主机
 	h, err := libp2p.New(
 		libp2p.ListenAddrStrings(listenAddrs...),
+		libp2p.Identity(s.privKey),
 		libp2p.DefaultTransports,
 		libp2p.DefaultMuxers,
 		libp2p.DefaultSecurity,
@@ -91,7 +99,11 @@ func (s *sP2P) CreateLibp2pHost(ctx context.Context, port int) (host.Host, error
 		//libp2p.NATPortMapTimeout(30*time.Second),
 		// 禁用Relay（如果需要中继，可保留）
 		libp2p.DisableRelay(),
+		libp2p.NATPortMap(), // 自动尝试路由器端口映射（跨网络必备）
 	)
+	if err != nil {
+		return nil, err
+	}
 	g.Log().Debugf(ctx, "当前p2p的分享地址：%v", h.Addrs())
 
 	return h, err
@@ -186,7 +198,7 @@ func (s *sP2P) SendData(targetID string, data []byte) error {
 	}
 
 	// 创建流
-	stream, err := s.client.host.NewStream(gctx.New(), peerID, ProtocolID)
+	stream, err := s.client.host.NewStream(gctx.New(), peerID, protocol.ID(ProtocolID))
 	if err != nil {
 		return err
 	}

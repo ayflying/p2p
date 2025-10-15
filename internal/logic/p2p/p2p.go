@@ -9,8 +9,9 @@ import (
 	"time"
 
 	"github.com/ayflying/p2p/internal/service"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/libp2p/go-libp2p/core/protocol"
+	"github.com/libp2p/go-libp2p/core/crypto"
 )
 
 var (
@@ -19,8 +20,15 @@ var (
 
 // 常量定义
 const (
-	ProtocolID  protocol.ID = "/ay/1.0.0"
-	DefaultPort             = 51888
+	ProtocolID  string = "/ay/1.0.0"
+	DefaultPort        = 51888
+)
+
+var (
+	ipAPIs = []string{
+		//"http://ay.cname.com:51888/p2p/ip",
+		"http://54.67.8.27:51888/p2p/ip",
+	}
 )
 
 type MsgType string
@@ -44,8 +52,9 @@ type RegisterData struct {
 type sP2P struct {
 	Clients map[string]*ClientConn // 客户端ID -> 连接
 	lock    sync.RWMutex
-
-	client *Client
+	dht     *DHTType
+	privKey crypto.PrivKey
+	client  *Client
 }
 
 // New 创建一个新的 P2P 服务实例
@@ -53,6 +62,7 @@ func New() *sP2P {
 	return &sP2P{
 		Clients: make(map[string]*ClientConn),
 		client:  &Client{},
+		dht:     &DHTType{},
 	}
 }
 
@@ -63,14 +73,9 @@ func init() {
 // 获取公网IP并判断类型（ipv4/ipv6）
 func (s *sP2P) getPublicIPAndType() (ip string, ipType string, err error) {
 	// 公网IP查询接口（多个备用）
-	apis := []string{
-		"https://api.ip.sb/ip",
-		"https://ip.3322.net",
-		"https://ifconfig.cn",
-	}
 
 	client := http.Client{Timeout: 5 * time.Second}
-	for _, api := range apis {
+	for _, api := range ipAPIs {
 		resp, err := client.Get(api)
 		if err != nil {
 			continue
@@ -106,30 +111,28 @@ func (s *sP2P) getPublicIPAndType() (ip string, ipType string, err error) {
 }
 
 // 只获取IPv4公网IP（过滤IPv6结果）
-func (s *sP2P) getIPv4PublicIP() (string, error) {
+func (s *sP2P) GetIPv4PublicIP() (string, error) {
 	// 优先使用只返回IPv4的API，避免IPv6干扰
-	ipv4OnlyAPIs := []string{
-		//"https://api.ip.sb/ip",
-		"https://ip.3322.net",
-		//"https://ifconfig.cn",
-	}
 
-	client := http.Client{Timeout: 5 * time.Second}
-	for _, api := range ipv4OnlyAPIs {
-		resp, err := client.Get(api)
+	//client := http.Client{Timeout: 5 * time.Second}
+	for _, api := range ipAPIs {
+		//resp, err := client.Get(api)
+		resp, err := g.Client().Timeout(5*time.Second).Get(ctx, api)
 		if err != nil {
 			continue
 		}
-		defer resp.Body.Close()
+		defer resp.Close()
+		//defer resp.Body.Close()
 
 		// 读取响应
-		buf := make([]byte, 128)
-		n, err := resp.Body.Read(buf)
-		if err != nil {
-			continue
-		}
+		//buf := make([]byte, 128)
+		//n, err := resp.Body.Read(buf)
+		//if err != nil {
+		//	continue
+		//}
 
-		ip := strings.TrimSpace(string(buf[:n]))
+		//ip := strings.TrimSpace(string(buf[:n]))
+		ip := strings.TrimSpace(resp.ReadAllString())
 		if ip == "" {
 			continue
 		}

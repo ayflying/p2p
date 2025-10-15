@@ -13,4 +13,5 @@ import (
 type IP2PV1 interface {
 	Connect(ctx context.Context, req *v1.ConnectReq) (res *v1.ConnectRes, err error)
 	Send(ctx context.Context, req *v1.SendReq) (res *v1.SendRes, err error)
+	Ip(ctx context.Context, req *v1.IpReq) (res *v1.IpRes, err error)
 }

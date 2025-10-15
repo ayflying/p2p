@@ -67,7 +67,6 @@ var (
 					group.Middleware(ghttp.MiddlewareHandlerResponse)
 					service.P2P().GatewayStart(ctx, group)
 				})
-				s.Run()
 			case "client":
 				// 获取客户端模式所需的参数
 				g.Log().Debug(ctx, "开始执行client")
@@ -78,7 +77,24 @@ var (
 				err = service.P2P().Start(ctx, wsStr)
 			case "dht":
 				h, _ := service.P2P().CreateLibp2pHost(ctx, 0)
-				service.P2P().DHTStart(ctx, h)
+				err := service.P2P().DHTStart(ctx, h)
+				if err != nil {
+					g.Log().Error(ctx, err)
+				}
+
+				publicIp, err := service.P2P().GetIPv4PublicIP()
+				err = service.P2P().StoreAddrToDHT(ctx, "ip", publicIp)
+				if err != nil {
+					return
+				}
+			case "dht2":
+				h, _ := service.P2P().CreateLibp2pHost(ctx, 0)
+				err := service.P2P().DHTStart(ctx, h)
+				if err != nil {
+					g.Log().Error(ctx, err)
+				}
+				get, _ := service.P2P().FindAddrFromDHT(ctx, "ip")
+				g.Dump(get)
 
 			default:
 				// 显示帮助信息
@@ -88,6 +104,8 @@ var (
 			if err != nil {
 				return err
 			}
+
+			s.Run()
 			return
 		},
 	}
