@@ -5,5 +5,6 @@
 package logic
 
 import (
+	_ "github.com/ayflying/p2p/internal/logic/os"
 	_ "github.com/ayflying/p2p/internal/logic/p2p"
 )

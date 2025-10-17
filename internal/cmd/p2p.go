@@ -84,9 +84,7 @@ var (
 
 				publicIp, err := service.P2P().GetIPv4PublicIP()
 				err = service.P2P().StoreAddrToDHT(ctx, "ip", publicIp)
-				if err != nil {
-					return
-				}
+
 			case "dht2":
 				h, _ := service.P2P().CreateLibp2pHost(ctx, 0)
 				err := service.P2P().DHTStart(ctx, h)
@@ -95,7 +93,7 @@ var (
 				}
 				get, _ := service.P2P().FindAddrFromDHT(ctx, "ip")
 				g.Dump(get)
-
+				s.SetPort(0)
 			default:
 				// 显示帮助信息
 				g.Log().Info(ctx, p2pHelpDescription)

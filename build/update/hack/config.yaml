@@ -3,13 +3,13 @@
 # https://goframe.org/docs/cli
 gfcli:
   build:
-    name: "p2p"
+    name: "update"
     arch: "amd64"
-    system: "windows,linux"
+    system: "windows"
     mod: "none"
-    packSrc: "resource,manifest"
+#    packSrc: "resource,manifest"
     version: "v1.0.0"
-    path: "./bin"
+    #   output: "./bin/"
 #    extra: -trimpath -ldflags="-s -w -H=windowsgui"
     extra: -trimpath -ldflags="-s -w"
 #    cgo: true

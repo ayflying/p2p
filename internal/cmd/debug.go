@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 
+	"github.com/ayflying/p2p/internal/service"
 	"github.com/dop251/goja"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcmd"
@@ -50,11 +51,13 @@ var (
 				msg = res.Export()
 				g.Dump(res.ToNumber())
 			case "p2p":
-				// host, err := service.P2P().Start(ctx)
-				// if err != nil {
-				// 	break
-				// }
-				// g.Dump(host.ID().String(), host.Addrs())
+			// host, err := service.P2P().Start(ctx)
+			// if err != nil {
+			// 	break
+			// }
+			// g.Dump(host.ID().String(), host.Addrs())
+			case "update":
+				service.OS().Update("v1.0.0", "http://127.0.0.1:8080")
 			}
 			g.Log().Debug(ctx, msg)
 			return

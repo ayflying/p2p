@@ -14,13 +14,13 @@ import (
 
 type (
 	IP2P interface {
+		// SendP2P 发送格式化消息
+		SendP2P(targetID string, typ string, data []byte) (err error)
 		Start(ctx context.Context, wsStr string) (err error)
 		// 创建libp2p主机
 		CreateLibp2pHost(ctx context.Context, port int) (host.Host, error)
 		// 发现并连接目标节点
 		DiscoverAndConnect(targetID string) error
-		// 发送数据到目标节点
-		SendData(targetID string, data []byte) error
 		// 初始化无服务器DHT（作为节点加入DHT网络）
 		DHTStart(ctx context.Context, h host.Host) (err error)
 		// 存储数据到DHT（比如存储“目标节点ID-公网地址”的映射）

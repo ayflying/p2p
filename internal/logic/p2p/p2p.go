@@ -39,8 +39,9 @@ const (
 	MsgTypeDiscover      = "discover"       // 发现目标客户端
 	MsgTypeDiscoverAck   = "discover_ack"   // 发现响应
 	MsgTypeConnectionReq = "connection_req" // 连接请求通知
-	MsgTypePunchRequest  = "punch_request"
-	MsgTypeError         = "error" // 错误消息
+	MsgTypePunchRequest  = "punch_request"  // 打洞请求
+	MsgTypeError         = "error"          // 错误消息
+	MsgUpdate            = "update"         // 更新节点信息
 )
 
 // 注册请求数据

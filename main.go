@@ -1,9 +1,10 @@
 package main
 
 import (
-	_ "github.com/ayflying/p2p/internal/packed"
-
+	"github.com/ayflying/p2p/internal/consts"
 	_ "github.com/ayflying/p2p/internal/logic"
+	_ "github.com/ayflying/p2p/internal/packed"
+	"github.com/ayflying/p2p/internal/service"
 
 	//步骤1：加载驱动
 	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
@@ -12,6 +13,13 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
+var (
+	ctx = gctx.GetInitCtx()
+)
+
 func main() {
-	cmd.Main.Run(gctx.GetInitCtx())
+	// 启动系统托盘
+	service.OS().Load(consts.Name, consts.Name+"服务端", "manifest/images/favicon.ico")
+
+	cmd.Main.Run(ctx)
 }

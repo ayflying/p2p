@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/gogf/gf/v2/frame/g"
 	//"github.com/ipfs/boxo/ipns"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/libp2p/go-libp2p/core/host"
@@ -73,7 +74,8 @@ func (s *sP2P) StoreAddrToDHT(ctx context.Context, key string, addr string) (err
 	if err = s.dht.KadDHT.PutValue(ctx, key, value); err != nil {
 		return fmt.Errorf("key=%s,存储地址到DHT失败: %v", key, err)
 	}
-	fmt.Printf("成功存储地址到DHT，Key=%s, Value=%s\n", key, addr)
+
+	g.Log().Info(ctx, "成功存储地址到DHT，Key=%s, Value=%s", key, addr)
 	return
 }
 
@@ -83,6 +85,7 @@ func (s *sP2P) FindAddrFromDHT(ctx context.Context, key string) (string, error) 
 	//key = s.generateStringDHTKey(key)
 	//key = "/ipns/" + key
 	key = fmt.Sprintf("%s/%s", ProtocolID, key)
+	g.Log().Debugf(ctx, "从DHT查找地址中...，Key=%s", key)
 	value, err := s.dht.KadDHT.GetValue(ctx, key)
 	if err != nil {
 		return "", fmt.Errorf("从DHT查找地址失败: %v", err)

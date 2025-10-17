@@ -8,6 +8,6 @@ import (
 )
 
 func (c *ControllerV1) Send(ctx context.Context, req *v1.SendReq) (res *v1.SendRes, err error) {
-	err = service.P2P().SendData(req.TargetID, []byte(req.Data))
+	err = service.P2P().SendP2P(req.TargetID, "message", []byte(req.Data))
 	return
 }

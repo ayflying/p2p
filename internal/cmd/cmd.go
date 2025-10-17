@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"net"
 	"time"
 
 	"github.com/ayflying/p2p/internal/controller/p2p"
@@ -23,6 +22,8 @@ func init() {
 }
 
 var (
+	s = g.Server()
+
 	Main = gcmd.Command{
 		Name:  "main",
 		Usage: "main",
@@ -38,7 +39,6 @@ var (
 			ws := parser.GetOpt("ws", addr).String()
 			//port := parser.GetOpt("port", 0).Int()
 
-			s := g.Server()
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.Middleware(ghttp.MiddlewareHandlerResponse)
 				group.Bind(
@@ -64,12 +64,12 @@ var (
 				err = service.P2P().Start(ctx, ws)
 
 				g.Log().Debugf(ctx, "当前监听端口:%v", s.GetListenedPort())
-				addrs, _ := net.InterfaceAddrs()
-				for _, addr := range addrs {
-					if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
-						g.Log().Infof(ctx, "访问地址:http://%v:%d", ipnet.IP.String(), s.GetListenedPort())
-					}
-				}
+				//addrs, _ := net.InterfaceAddrs()
+				//for _, addr := range addrs {
+				//	if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
+				//		g.Log().Infof(ctx, "访问地址:http://%v:%d", ipnet.IP.String(), s.GetListenedPort())
+				//	}
+				//}
 
 			})
 
