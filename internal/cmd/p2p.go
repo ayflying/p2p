@@ -77,12 +77,12 @@ var (
 				//addr := "/ip4/192.168.50.173/tcp/51888/p2p/12D3KooWJKBB9bF9MjqgsFYUUsPBG249FDq7a3ZdaYc9iw8G78JQ"
 				//addrs := "WyIvaXA0LzEyNy4wLjAuMS90Y3AvNTE4ODgiLCIvaXA0LzE5Mi4xNjguNTAuMTczL3RjcC81MTg4OCJd"
 				wsStr := "ws://192.168.50.173:51888/ws"
-				err = service.P2P().Start(ctx, wsStr)
+				err = service.P2P().Start(wsStr)
 			case "dht":
 				g.Log().Debug(ctx, "开始执行dht")
-				h, _ := service.P2P().CreateLibp2pHost(ctx, 0)
+				h, _ := service.P2P().CreateLibp2pHost(ctx, 23333)
 
-				err := service.P2P().DHTStart(ctx, h, nil)
+				err := service.P2P().DHTStart(h, nil)
 				if err != nil {
 					g.Log().Error(ctx, err)
 				}
@@ -98,17 +98,23 @@ var (
 
 			case "dht2":
 				g.Log().Debug(ctx, "开始执行dht2")
-				h, _ := service.P2P().CreateLibp2pHost(ctx, 0)
+				h, _ := service.P2P().CreateLibp2pHost(ctx, 23333)
 
-				addr := []string{
-					//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
-					//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
-					//"/ip4/114.132.176.115/tcp/23333/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
-					//"/ip4/114.132.176.115/udp/23333/quic-v1/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
-				}
+				//addr := []string{
+				//	"/ip4/192.168.50.243/tcp/23333/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+				//	"/ip4/192.168.50.243/udp/23333/quic-v1/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+				//
+				//	"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+				//	"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+				//
+				//	//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
+				//	//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
+				//	//"/ip4/114.132.176.115/tcp/23333/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
+				//	//"/ip4/114.132.176.115/udp/23333/quic-v1/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
+				//}
 
 				id := gcmd.GetOpt("id").String()
-				err := service.P2P().DHTStart(ctx, h, addr)
+				err := service.P2P().DHTStart(h, nil)
 				if err != nil {
 					g.Log().Error(ctx, err)
 				}

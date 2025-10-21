@@ -16,13 +16,13 @@ type (
 	IP2P interface {
 		// SendP2P 发送格式化消息
 		SendP2P(targetID string, typ string, data []byte) (err error)
-		Start(ctx context.Context, wsStr string) (err error)
+		Start(wsStr string) (err error)
 		// 创建libp2p主机
 		CreateLibp2pHost(ctx context.Context, port int) (host.Host, error)
 		// 发现并连接目标节点
 		DiscoverAndConnect(targetID string) error
 		// 初始化无服务器DHT（作为节点加入DHT网络）
-		DHTStart(ctx context.Context, h host.Host, bootstrapPeers []string) (err error)
+		DHTStart(h host.Host, bootstrapPeers []string) (err error)
 		// StoreToDHT 存储数据到 DHT（自动分布式存储）
 		StoreToDHT(ctx context.Context, key string, value string) (err error)
 		// FindFromDHT 从 DHT 查找数据（从网络节点获取）

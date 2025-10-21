@@ -71,8 +71,8 @@ func (s *sP2P) linkTcp(addr string) {
 	//defer gtcpConn.Close()
 }
 
-func (s *sP2P) Start(ctx context.Context, wsStr string) (err error) {
-
+func (s *sP2P) Start(wsStr string) (err error) {
+	var ctx = gctx.New()
 	hostObj, err := s.CreateLibp2pHost(ctx, 0)
 	if err != nil {
 		g.Log().Error(ctx, err)
@@ -97,7 +97,7 @@ func (s *sP2P) Start(ctx context.Context, wsStr string) (err error) {
 	}
 
 	// 启动网关消息接收协程
-	go s.receiveGatewayMessages()
+	go s.receiveGatewayMessages(ctx)
 
 	g.Log().Infof(ctx, "已连接网关成功，客户端ID: %s", s.client.Id)
 	//g.Log().Infof(ctx,"当前地址：http://127.0.0.1/")
@@ -134,8 +134,8 @@ func (s *sP2P) CreateLibp2pHost(ctx context.Context, port int) (host.Host, error
 		libp2p.DefaultSecurity,
 		// 增加NAT端口映射尝试时间
 		//libp2p.NATPortMapTimeout(30*time.Second),
-		// 禁用Relay（如果需要中继，可保留）
-		libp2p.DisableRelay(),
+
+		//libp2p.DisableRelay(), 	// 禁用Relay（如果需要中继，可保留）
 		libp2p.NATPortMap(), // 自动尝试路由器端口映射（跨网络必备）
 	)
 	if err != nil {
@@ -148,6 +148,7 @@ func (s *sP2P) CreateLibp2pHost(ctx context.Context, port int) (host.Host, error
 
 // 连接网关（WebSocket）
 func (s *sP2P) connectGateway() (err error) {
+	var ctx = gctx.New()
 	conn, _, err := websocket.DefaultDialer.Dial(s.client.gatewayURL, nil)
 	if err != nil {
 		gtimer.SetTimeout(ctx, 3*time.Minute, func(ctx context.Context) {
@@ -211,6 +212,7 @@ func (s *sP2P) DiscoverAndConnect(targetID string) error {
 
 // 处理P2P流
 func (s *sP2P) handleStream(stream network.Stream) {
+	ctx := gctx.New()
 	defer stream.Close()
 
 	peerID := stream.Conn().RemotePeer().String()
@@ -252,6 +254,7 @@ func (s *sP2P) sendData(targetID string, data []byte) error {
 
 // 处理网关的打洞请求
 func (s *sP2P) handlePunchRequest(data json.RawMessage) error {
+	ctx := gctx.New()
 	var punchData struct {
 		FromID string   `json:"from_id"`
 		PeerID string   `json:"peer_id"`
@@ -312,7 +315,7 @@ func (s *sP2P) sendToGateway(msg GatewayMessage) (err error) {
 }
 
 // 接收网关消息
-func (s *sP2P) receiveGatewayMessages() {
+func (s *sP2P) receiveGatewayMessages(ctx context.Context) {
 	for {
 		_, data, err := s.client.wsConn.ReadMessage()
 		if err != nil {

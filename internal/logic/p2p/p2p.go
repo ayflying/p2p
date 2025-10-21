@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	ctx = gctx.New()
-	ip  string
+	//ctx = gctx.New()
+	ip string
 )
 
 // 常量定义
@@ -121,6 +121,7 @@ func (s *sP2P) getPublicIPAndType() (ip string, ipType string, err error) {
 
 // 只获取IPv4公网IP（过滤IPv6结果）
 func (s *sP2P) GetIPv4PublicIP() (string, error) {
+	ctx := gctx.New()
 	// 优先使用只返回IPv4的API，避免IPv6干扰
 
 	//client := http.Client{Timeout: 5 * time.Second}

@@ -80,9 +80,9 @@ func (s *sP2P) GatewayStart(ctx context.Context, group *ghttp.RouterGroup) (err 
 			// 处理不同类型的消息
 			switch msg.Type {
 			case MsgTypeRegister:
-				s.handleRegister(ws, msg)
+				s.handleRegister(ctx, ws, msg)
 			case MsgTypeDiscover:
-				s.handleDiscover(ws, msg)
+				s.handleDiscover(ctx, ws, msg)
 			default:
 				g.Log().Error(ctx, "未知消息类型: %s", msg.Type)
 			}
@@ -96,7 +96,7 @@ func (s *sP2P) GatewayStart(ctx context.Context, group *ghttp.RouterGroup) (err 
 }
 
 // 处理注册请求
-func (s *sP2P) handleRegister(conn *websocket.Conn, msg GatewayMessage) {
+func (s *sP2P) handleRegister(ctx context.Context, conn *websocket.Conn, msg GatewayMessage) {
 	if msg.From == "" {
 		g.Log().Error(ctx, "客户端ID不能为空")
 		return
@@ -196,7 +196,7 @@ func (s *sP2P) sendMessage(conn *websocket.Conn, msg GatewayMessage) error {
 }
 
 // 处理发现请求
-func (s *sP2P) handleDiscover(conn *websocket.Conn, msg GatewayMessage) {
+func (s *sP2P) handleDiscover(ctx context.Context, conn *websocket.Conn, msg GatewayMessage) {
 	if msg.From == "" {
 		s.sendError(conn, "消息缺少发送方ID（from）")
 		return

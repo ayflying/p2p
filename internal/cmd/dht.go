@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/frame/g"
@@ -28,15 +29,16 @@ var (
 			parser, err = gcmd.Parse(g.MapStrBool{
 				"p,port": true,
 			})
-			port := parser.GetOpt("port", "0").Int()
+			port := parser.GetOpt("port", "23333").Int()
 
 			h, _ := service.P2P().CreateLibp2pHost(ctx, port)
-			err = service.P2P().DHTStart(ctx, h, nil)
+			err = service.P2P().DHTStart(h, nil)
 			if err != nil {
 				g.Log().Error(ctx, err)
 			}
 
 			go func() {
+				time.Sleep(5 * time.Second)
 				publicIp, _ := service.P2P().GetIPv4PublicIP()
 				validKey := fmt.Sprintf("%v/ip", h.ID())
 				dataValue := fmt.Sprintf("来自节点 %s 的数据:%v", h.ID().ShortString(), publicIp)
