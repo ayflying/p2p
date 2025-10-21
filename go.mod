@@ -3,6 +3,7 @@ module github.com/ayflying/p2p
 go 1.24.0
 
 require (
+	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
 	github.com/getlantern/systray v1.2.2
 	github.com/gogf/gf/contrib/nosql/redis/v2 v2.9.3
@@ -12,6 +13,7 @@ require (
 	github.com/libp2p/go-libp2p v0.43.0
 	github.com/libp2p/go-libp2p-kad-dht v0.35.1
 	github.com/multiformats/go-multiaddr v0.16.1
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 )
 
 require (

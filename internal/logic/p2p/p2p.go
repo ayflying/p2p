@@ -1,7 +1,10 @@
 package p2p
 
 import (
+	"encoding/binary"
+	"encoding/pem"
 	"fmt"
+	"math/rand"
 	"net"
 	"net/http"
 	"strings"
@@ -11,16 +14,19 @@ import (
 	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/gfile"
+	"github.com/gogf/gf/v2/util/grand"
 	"github.com/libp2p/go-libp2p/core/crypto"
 )
 
 var (
 	ctx = gctx.New()
+	ip  string
 )
 
 // 常量定义
 const (
-	ProtocolID  string = "/ay/1.0.0"
+	ProtocolID  string = "/ay"
 	DefaultPort        = 51888
 )
 
@@ -60,6 +66,7 @@ type sP2P struct {
 
 // New 创建一个新的 P2P 服务实例
 func New() *sP2P {
+
 	return &sP2P{
 		Clients: make(map[string]*ClientConn),
 		client:  &Client{},
@@ -69,6 +76,7 @@ func New() *sP2P {
 
 func init() {
 	service.RegisterP2P(New())
+	ip, _ = service.P2P().GetIPv4PublicIP()
 }
 
 // 获取公网IP并判断类型（ipv4/ipv6）
@@ -176,4 +184,50 @@ func (s *sP2P) removeDuplicates(strs []string) []string {
 		}
 	}
 	return result
+}
+
+// 生成固定密钥（核心：通过固定种子生成相同密钥）
+func (s *sP2P) generateFixedKey() (crypto.PrivKey, error) {
+	privKeyPath := "runtime/p2p.key"
+	if ok := gfile.Exists(privKeyPath); ok {
+		// 从文件读取密钥
+		keyBytes := gfile.GetBytes(privKeyPath)
+		// 2. 解析PEM块（关键：提取真正的私钥数据）
+		pemBlock, _ := pem.Decode(keyBytes)
+		if pemBlock == nil {
+			return nil, fmt.Errorf("私钥文件格式错误（非PEM格式）")
+		}
+		privKey, err := crypto.UnmarshalPrivateKey(pemBlock.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		return privKey, nil
+	}
+
+	// 固定种子（修改此种子可生成不同的固定密钥）
+	var fixedSeed = []byte(grand.S(10)) // 自定义固定种子
+
+	// 用固定种子初始化随机数生成器
+	seed := binary.BigEndian.Uint64(fixedSeed[:8]) // 取种子前8字节作为随机数种子
+	r := rand.New(rand.NewSource(int64(seed)))
+
+	// 生成ED25519密钥对（基于固定种子，每次生成结果相同）
+	privKey, _, err := crypto.GenerateEd25519Key(r)
+	keyBytes, err := crypto.MarshalPrivateKey(privKey)
+	// 用PEM格式包装（标准格式，便于存储和解析）
+	pemBlock := &pem.Block{
+		Type:  "LIBP2P PRIVATE KEY", // 标识为libp2p私钥
+		Bytes: keyBytes,
+	}
+	err = gfile.PutBytes(privKeyPath, pem.EncodeToMemory(pemBlock))
+	if err != nil {
+		panic(fmt.Sprintf("保存私钥失败: %v", err))
+	}
+	//if err := os.WriteFile(privKeyPath, pem.EncodeToMemory(pemBlock), 0600); err != nil {
+	//	panic(fmt.Sprintf("保存私钥失败: %v", err))
+	//}
+
+	fmt.Println("私钥生成成功，文件路径：", privKeyPath)
+
+	return privKey, err
 }

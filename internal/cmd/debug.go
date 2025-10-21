@@ -22,6 +22,8 @@ var (
 		Usage: "debug",
 		Brief: "调试接口",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
+			g.Log().Debug(ctx, "开始执行debug")
+
 			g.Log().SetConfigWithMap(g.Map{
 				"level":  "all",
 				"stdout": true,

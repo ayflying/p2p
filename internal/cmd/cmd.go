@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	err := Main.AddCommand(&Main, &Debug, &P2p)
+	err := Main.AddCommand(&Main, &Debug, &P2p, &DHT)
 	if err != nil {
 		g.Log().Error(gctx.GetInitCtx(), err)
 		return
@@ -29,6 +29,7 @@ var (
 		Usage: "main",
 		Brief: "start http server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
+			g.Log().Debug(ctx, "开始执行main")
 
 			parser, err = gcmd.Parse(g.MapStrBool{
 				"w,ws":      true,

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/frame/g"
@@ -40,6 +41,8 @@ var (
 		Description: p2pHelpDescription,
 		// Func 为命令的执行函数，接收上下文和参数解析器
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
+			g.Log().Debug(ctx, "开始执行p2p")
+
 			s := g.Server()
 
 			// 配置日志输出
@@ -76,23 +79,50 @@ var (
 				wsStr := "ws://192.168.50.173:51888/ws"
 				err = service.P2P().Start(ctx, wsStr)
 			case "dht":
+				g.Log().Debug(ctx, "开始执行dht")
 				h, _ := service.P2P().CreateLibp2pHost(ctx, 0)
-				err := service.P2P().DHTStart(ctx, h)
+
+				err := service.P2P().DHTStart(ctx, h, nil)
 				if err != nil {
 					g.Log().Error(ctx, err)
 				}
 
 				publicIp, err := service.P2P().GetIPv4PublicIP()
-				err = service.P2P().StoreAddrToDHT(ctx, "ip", publicIp)
+				validKey := "ip"
+				dataValue := fmt.Sprintf("来自节点 %s 的数据:%v", h.ID().ShortString(), publicIp)
+				if err := service.P2P().StoreToDHT(ctx, validKey, dataValue); err != nil {
+					fmt.Printf("❌ 存储失败: %v\n", err)
+				} else {
+					fmt.Printf("✅ 存储成功\nKey: %s\nValue: %s\n", validKey, dataValue)
+				}
 
 			case "dht2":
+				g.Log().Debug(ctx, "开始执行dht2")
 				h, _ := service.P2P().CreateLibp2pHost(ctx, 0)
-				err := service.P2P().DHTStart(ctx, h)
+
+				addr := []string{
+					//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
+					//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
+					//"/ip4/114.132.176.115/tcp/23333/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
+					//"/ip4/114.132.176.115/udp/23333/quic-v1/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
+				}
+
+				id := gcmd.GetOpt("id").String()
+				err := service.P2P().DHTStart(ctx, h, addr)
 				if err != nil {
 					g.Log().Error(ctx, err)
 				}
-				get, _ := service.P2P().FindAddrFromDHT(ctx, "ip")
-				g.Dump(get)
+				validKey := id
+				go func() {
+					// 5. 查找数据（从网络中的节点获取，不依赖初始 Bootstrap 节点）
+					foundValue, err := service.P2P().FindFromDHT(ctx, validKey)
+					if err != nil {
+						fmt.Printf("❌ 查找失败: %v\n", err)
+					} else {
+						fmt.Printf("✅ 查找成功\nValue: %s\n", foundValue)
+					}
+				}()
+
 				s.SetPort(0)
 			default:
 				// 显示帮助信息

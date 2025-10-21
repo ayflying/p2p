@@ -22,11 +22,11 @@ type (
 		// 发现并连接目标节点
 		DiscoverAndConnect(targetID string) error
 		// 初始化无服务器DHT（作为节点加入DHT网络）
-		DHTStart(ctx context.Context, h host.Host) (err error)
-		// 存储数据到DHT（比如存储“目标节点ID-公网地址”的映射）
-		StoreAddrToDHT(ctx context.Context, key string, addr string) (err error)
-		// 从DHT查找数据（比如根据节点ID查找其公网地址）
-		FindAddrFromDHT(ctx context.Context, key string) (string, error)
+		DHTStart(ctx context.Context, h host.Host, bootstrapPeers []string) (err error)
+		// StoreToDHT 存储数据到 DHT（自动分布式存储）
+		StoreToDHT(ctx context.Context, key string, value string) (err error)
+		// FindFromDHT 从 DHT 查找数据（从网络节点获取）
+		FindFromDHT(ctx context.Context, key string) (string, error)
 		GatewayStart(ctx context.Context, group *ghttp.RouterGroup) (err error)
 		// 只获取IPv4公网IP（过滤IPv6结果）
 		GetIPv4PublicIP() (string, error)
