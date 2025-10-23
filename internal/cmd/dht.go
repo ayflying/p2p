@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ayflying/p2p/internal/consts"
 	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcmd"
@@ -25,6 +26,7 @@ var (
 		// Func 为命令的执行函数，接收上下文和参数解析器
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			g.Log().Debug(ctx, "开始执行dht")
+			s := g.Server(consts.Name)
 
 			parser, err = gcmd.Parse(g.MapStrBool{
 				"p,port": true,

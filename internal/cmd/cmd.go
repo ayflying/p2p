@@ -4,7 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/ayflying/p2p/internal/consts"
 	"github.com/ayflying/p2p/internal/controller/p2p"
+	"github.com/ayflying/p2p/internal/controller/system"
 	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -22,14 +24,16 @@ func init() {
 }
 
 var (
-	s = g.Server()
-
 	Main = gcmd.Command{
 		Name:  "main",
 		Usage: "main",
 		Brief: "start http server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			g.Log().Debug(ctx, "开始执行main")
+			Version, err := g.Cfg("hack").Get(ctx, "gfcli.build.version")
+			g.Log().Debugf(ctx, "当前启动的版本为：%v", Version)
+
+			s := g.Server(consts.Name)
 
 			parser, err = gcmd.Parse(g.MapStrBool{
 				"p,port": true,
@@ -49,6 +53,7 @@ var (
 				group.Middleware(ghttp.MiddlewareHandlerResponse)
 				group.Bind(
 					p2p.NewV1(),
+					system.NewV1(),
 				)
 			})
 
@@ -78,6 +83,9 @@ var (
 				//}
 
 			})
+
+			// 启动系统托盘
+			service.OS().Load(consts.Name, consts.Name+"服务端", "manifest/images/favicon.ico")
 
 			s.Run()
 			return nil

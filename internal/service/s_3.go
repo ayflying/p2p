@@ -41,6 +41,8 @@ type (
 		GetUrl(filePath string, defaultFile ...string) (url string)
 		// GetPath 从文件访问 URL 中提取文件路径
 		GetPath(url string) (filePath string)
+		// GetCdnUrl 通过文件名，获取直连地址
+		GetCdnUrl(file string) string
 		// CopyObject 在指定存储桶内复制文件
 		// bucketName 存储桶名称
 		// dstStr 目标文件路径

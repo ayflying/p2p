@@ -7,7 +7,7 @@ gfcli:
     arch: "amd64"
     system: "windows,linux"
     mod: "none"
-    packSrc: "resource,manifest"
+    packSrc: "hack,resource,manifest"
     version: "v1.0.0"
     path: "./bin"
 #    extra: -trimpath -ldflags="-s -w -H=windowsgui"

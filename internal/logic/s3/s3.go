@@ -242,6 +242,12 @@ func (s *sS3) GetPath(url string) (filePath string) {
 	return url[len(get+bucketName)+1:]
 }
 
+// GetCdnUrl 通过文件名，获取直连地址
+func (s *sS3) GetCdnUrl(file string) string {
+	urlStr, _ := url.JoinPath(s.cfg.Url, file)
+	return urlStr
+}
+
 // CopyObject 在指定存储桶内复制文件
 // bucketName 存储桶名称
 // dstStr 目标文件路径

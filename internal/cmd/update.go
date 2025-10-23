@@ -7,6 +7,7 @@ import (
 	"path"
 	"runtime"
 
+	systemV1 "github.com/ayflying/p2p/api/system/v1"
 	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/crypto/gsha1"
 	"github.com/gogf/gf/v2/encoding/gcompress"
@@ -45,8 +46,8 @@ var (
 			var filePath = path.Join(pathMain, version, platform, name)
 			dirList, _ := gfile.ScanDir(path.Join(pathMain, version), "*", false)
 			for _, v := range dirList {
-				updateFilename := gfile.Name(v)
-				updateFilePath := path.Join("server_update", name, version, updateFilename)
+				updatePlatform := gfile.Name(v)
+				updateFilePath := path.Join("server_update", name, version, updatePlatform)
 
 				var obj bytes.Buffer
 				g.Log().Debugf(ctx, "读取目录成功:%v", v)
@@ -54,14 +55,14 @@ var (
 				g.Log().Debugf(ctx, "判断当前文件是否存在：%v", fileMian)
 				if gfile.IsFile(fileMian) {
 					// 写入文件哈希
-					versionFile[updateFilePath+".gz"] = gsha1.MustEncryptFile(fileMian)
+					versionFile[updatePlatform] = gsha1.MustEncryptFile(fileMian)
 					err = gcompress.GzipPathWriter(fileMian, &obj)
 					service.S3().PutObject(ctx, &obj, updateFilePath+".gz")
 					g.Log().Debugf(ctx, "成功上传文件到：%v", updateFilePath+".gz")
 				}
 				if gfile.IsFile(fileMian + ".exe") {
 					// 写入文件哈希
-					versionFile[updateFilePath+".gz"] = gsha1.MustEncryptFile(fileMian + ".exe")
+					versionFile[updatePlatform] = gsha1.MustEncryptFile(fileMian + ".exe")
 					err = gcompress.GzipPathWriter(fileMian+".exe", &obj)
 					service.S3().PutObject(ctx, &obj, updateFilePath+".gz")
 					g.Log().Debugf(ctx, "成功上传文件到：%v", updateFilePath+".gz")
@@ -69,13 +70,38 @@ var (
 
 				// 写入文件版本文件
 				fileByte := gjson.MustEncode(versionFile)
-				service.S3().PutObject(ctx, bytes.NewReader(fileByte), path.Join("server_update", name, version, "version.json"))
+				service.S3().PutObject(ctx, bytes.NewReader(fileByte), path.Join("server_update", name, "version.json"))
 				if err != nil {
 					g.Log().Error(ctx, err)
 				}
 			}
-
 			g.Log().Debugf(ctx, "当前获取到的地址为：%v", filePath)
+
+			versionUrl := service.S3().GetCdnUrl(path.Join("server_update", name, "version.json"))
+			listVar := g.Cfg().MustGet(ctx, "p2p.list")
+			var p2pItem []struct {
+				Host string `json:"host"`
+				Port int    `json:"port"`
+				SSL  bool   `json:"ssl"`
+				Ws   string `json:"ws"`
+			}
+			listVar.Scan(&p2pItem)
+			for _, v := range p2pItem {
+
+				url := "http"
+				if v.SSL == true {
+					url = "https"
+				}
+				url = fmt.Sprintf("%s://%s:%d/system/update", url, v.Host, v.Port)
+
+				g.Log().Debugf(ctx, "开始上传到服务器：%v,file=%v", url, versionUrl)
+				_, err := g.Client().Get(ctx, url, systemV1.UpdateReq{
+					Url: versionUrl,
+				})
+				if err != nil {
+					g.Log().Error(ctx, err)
+				}
+			}
 			return
 		}}
 )
