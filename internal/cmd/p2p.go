@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/frame/g"
@@ -41,7 +42,7 @@ var (
 		Description: p2pHelpDescription,
 		// Func 为命令的执行函数，接收上下文和参数解析器
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
-			g.Log().Debug(ctx, "开始执行p2p")
+			g.Log().Debug(ctx, "开始执行p2p v1.0.3")
 
 			s := g.Server()
 
@@ -82,7 +83,20 @@ var (
 				g.Log().Debug(ctx, "开始执行dht")
 				h, _ := service.P2P().CreateLibp2pHost(ctx, 23333)
 
-				err := service.P2P().DHTStart(h, nil)
+				addr := []string{
+					"/ip4/192.168.50.243/tcp/23333/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+					"/ip4/192.168.50.243/udp/23333/quic-v1/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+
+					//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+					//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+
+					//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
+					//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
+					//"/ip4/114.132.176.115/tcp/23333/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
+					//"/ip4/114.132.176.115/udp/23333/quic-v1/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
+				}
+
+				err := service.P2P().DHTStart(h, addr)
 				if err != nil {
 					g.Log().Error(ctx, err)
 				}
@@ -95,17 +109,26 @@ var (
 				} else {
 					fmt.Printf("✅ 存储成功\nKey: %s\nValue: %s\n", validKey, dataValue)
 				}
-
+				s.SetPort(0)
 			case "dht2":
 				g.Log().Debug(ctx, "开始执行dht2")
 				h, _ := service.P2P().CreateLibp2pHost(ctx, 23333)
 
 				//addr := []string{
-				//	"/ip4/192.168.50.243/tcp/23333/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
-				//	"/ip4/192.168.50.243/udp/23333/quic-v1/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+				//	//"/ip4/192.168.50.243/tcp/23333/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+				//	//"/ip4/192.168.50.243/udp/23333/quic-v1/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
 				//
-				//	"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
-				//	"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+				//	//肖晓
+				//	"/ip4/192.168.50.244/tcp/23333/p2p/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
+				//	"/ip4/192.168.50.244/udp/23333/quic-v1/p2p/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
+				//
+				//	//廖玉龙
+				//	"/ip4/192.168.50.210/tcp/23333/p2p/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
+				//	"/ip4/192.168.50.210/udp/23333/quic-v1/p2p/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
+				//
+				//
+				//	//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+				//	//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
 				//
 				//	//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
 				//	//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
@@ -113,13 +136,16 @@ var (
 				//	//"/ip4/114.132.176.115/udp/23333/quic-v1/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
 				//}
 
-				id := gcmd.GetOpt("id").String()
-				err := service.P2P().DHTStart(h, nil)
+				addrVar, err := g.Cfg().Get(ctx, "dht.addrs")
+				addr := addrVar.Strings()
+
+				validKey := gcmd.GetOpt("id").String()
+				err = service.P2P().DHTStart(h, addr)
 				if err != nil {
 					g.Log().Error(ctx, err)
 				}
-				validKey := id
 				go func() {
+					time.Sleep(30 * time.Second)
 					// 5. 查找数据（从网络中的节点获取，不依赖初始 Bootstrap 节点）
 					foundValue, err := service.P2P().FindFromDHT(ctx, validKey)
 					if err != nil {

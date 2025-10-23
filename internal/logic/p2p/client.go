@@ -15,7 +15,6 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtimer"
 	"github.com/gogf/gf/v2/util/grand"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p/core/host"
@@ -23,6 +22,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/core/peerstore"
 	"github.com/libp2p/go-libp2p/core/protocol"
+	"github.com/libp2p/go-libp2p/p2p/net/connmgr"
 	"github.com/multiformats/go-multiaddr"
 )
 
@@ -82,7 +82,7 @@ func (s *sP2P) Start(wsStr string) (err error) {
 	// 创建客户端实例
 	s.client = &Client{
 		ctx:        ctx,
-		Id:         uuid.New().String(),
+		Id:         hostObj.ID().String(),
 		gatewayURL: wsStr,
 		host:       hostObj,
 		peers:      make(map[string]peer.ID),
@@ -114,6 +114,7 @@ func (s *sP2P) CreateLibp2pHost(ctx context.Context, port int) (host.Host, error
 		port = grand.N(50000, 55000)
 		//port = 53533
 	}
+
 	// 配置监听地址
 	//listenAddr := fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port)
 	var listenAddrs = []string{
@@ -122,25 +123,35 @@ func (s *sP2P) CreateLibp2pHost(ctx context.Context, port int) (host.Host, error
 	}
 
 	// 1. 生成密钥对并初始化节点（确保身份有效）
-	//s.privKey, _, _ = crypto.GenerateKeyPair(crypto.Ed25519, 0) // 推荐使用Ed25519
 	s.privKey, _ = s.generateFixedKey()
+
+	// 3. 手动创建并挂载连接管理器（v0.43.0兼容）
+	connMgr, err := connmgr.NewConnManager(
+		100,                                     // LowWater：连接数低于此值时不主动断开
+		500,                                     // HighWater：连接数高于此值时主动清理无效连接
+		connmgr.WithGracePeriod(30*time.Second), // 宽限期：新连接30秒内不被清理
+	)
 
 	// 创建主机
 	h, err := libp2p.New(
 		libp2p.ListenAddrStrings(listenAddrs...),
 		libp2p.Identity(s.privKey),
+		libp2p.EnableRelay(), // 启用中继兜底
+		// 关键：通过WithConnManager选项注入连接管理器
+		libp2p.ConnectionManager(connMgr),
 		libp2p.DefaultTransports,
 		libp2p.DefaultMuxers,
 		libp2p.DefaultSecurity,
-		// 增加NAT端口映射尝试时间
-		//libp2p.NATPortMapTimeout(30*time.Second),
-
-		//libp2p.DisableRelay(), 	// 禁用Relay（如果需要中继，可保留）
 		libp2p.NATPortMap(), // 自动尝试路由器端口映射（跨网络必备）
 	)
 	if err != nil {
 		return nil, err
 	}
+
+	if err != nil {
+		return nil, fmt.Errorf("创建ConnManager失败: %v", err)
+	}
+
 	g.Log().Debugf(ctx, "当前p2p的分享地址：%v", h.Addrs())
 
 	return h, err

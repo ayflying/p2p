@@ -3,19 +3,19 @@ package p2p
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/gogf/gf/v2/crypto/gsha1"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/libp2p/go-libp2p/core/peerstore"
 
 	//"github.com/ipfs/boxo/ipns"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
-	"github.com/libp2p/go-libp2p/core/peerstore"
 	"github.com/multiformats/go-multiaddr"
 )
 
@@ -40,11 +40,19 @@ func (s *sP2P) DHTStart(h host.Host, bootstrapPeers []string) (err error) {
 
 	if len(bootstrapPeers) == 0 {
 		bootstrapPeers = []string{
-			"/ip4/192.168.50.243/tcp/23333/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
-			"/ip4/192.168.50.243/udp/23333/quic-v1/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+			//"/ip4/192.168.50.243/tcp/23333/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+			//"/ip4/192.168.50.243/udp/23333/quic-v1/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+			//
+			//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+			//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
 
-			"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
-			"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+			//肖晓
+			"/ip4/192.168.50.244/tcp/23333/p2p/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
+			"/ip4/192.168.50.244/udp/23333/quic-v1/p2p/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
+
+			//廖玉龙
+			"/ip4/192.168.50.210/tcp/23333/p2p/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
+			"/ip4/192.168.50.210/udp/23333/quic-v1/p2p/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
 		}
 
 	}
@@ -54,9 +62,11 @@ func (s *sP2P) DHTStart(h host.Host, bootstrapPeers []string) (err error) {
 	// 2. 通过官方 Bootstrap 节点加入公共 DHT 网络（完全去中心化入口）
 	s.dht.KadDHT, err = s.joinGlobalDHT(ctx, h)
 	if err != nil {
-		log.Fatalf("加入 DHT 网络失败: %v", err)
+		g.Log().Infof(ctx, "加入 DHT 网络失败: %v", err)
+		g.Log().Info(ctx, "开启私有节点服务端等待中...")
+		return
 	}
-	fmt.Println("✅ 成功启动完全去中心化 DHT 网络")
+	g.Log().Debug(ctx, "✅ 成功启动完全去中心化 DHT 网络")
 
 	// 3. 定期打印路由表（观察节点自动发现效果）
 	go s.printRoutingTable(ctx, s.dht.KadDHT, 60*time.Second)
@@ -77,41 +87,42 @@ type NoOpValidator struct{}
 
 // Validate 总是返回成功，允许任何数据
 func (v *NoOpValidator) Validate(key string, value []byte) error {
-	g.Log().Debugf(gctx.New(), "当前有数据进行保存:key: %s, value: %s", key, value)
+
+	// 1. 检查key是否以 /ay/ 开头
+	if !strings.HasPrefix(key, "/ay/") {
+		return fmt.Errorf("拒绝存储：key必须以 /ay/ 开头，当前key为 %s", key)
+	}
+
+	g.Log().Debugf(gctx.New(), "外部数据进行保存:key: %s, value: %s", key, value)
+
 	// 限制数据大小（防止超大数据占用资源）
 	if len(value) > 1024*1024 { // 1MB上限
 		return fmt.Errorf("数据超过1MB，拒绝存储")
 	}
+
 	return nil
 }
 
 // Select 简单返回第一个数据（不做版本选择）
 func (v *NoOpValidator) Select(key string, values [][]byte) (int, error) {
+	g.Log().Debugf(gctx.New(), "外部数据进行选择:key: %s, values: %v", key, values)
 	return 0, nil
-}
-
-// 清空 Peerstore 中的所有节点缓存（替代 Clear() 方法）
-func (s *sP2P) clearPeerstore(ps peerstore.Peerstore) {
-	// 1. 获取所有缓存的节点 ID
-	peers := ps.Peers()
-	for _, p := range peers {
-		// 2. 删除该节点的所有地址
-		ps.ClearAddrs(p)
-		// 3. 移除该节点的所有元数据（如协议、密钥等）
-		ps.RemovePeer(p)
-	}
-	fmt.Println("✅ Peerstore 缓存已清空（旧节点地址已删除）")
 }
 
 // 加入全球公共 DHT 网络（通过官方 Bootstrap 节点，实现完全去中心化）
 func (s *sP2P) joinGlobalDHT(ctx context.Context, localHost host.Host) (*dht.IpfsDHT, error) {
-	// 关键：启动后先清空 Peerstore 缓存（删除旧公网节点）
-	s.clearPeerstore(localHost.Peerstore())
+	// 2. 基于Host创建IpfsDHT实例（关键步骤）
+	// 注意：需指定模式（Full/Client），私有网络中Bootstrap节点用Full模式，普通节点用Client模式
+	dhtOpts := []dht.Option{
+		dht.Mode(dht.ModeClient), // 普通节点用Client模式（轻量）
+		// dht.Mode(dht.ModeServer), // Bootstrap节点用Full模式（存储完整路由表）
+	}
 
 	// 创建 DHT 实例（ModeServer：作为完整节点参与存储和路由）
 	kadDHT, err := dht.New(
 		ctx,
-		localHost, dht.Mode(dht.ModeServer),
+		localHost,
+		dhtOpts...,
 	)
 	if err != nil {
 		return nil, err
@@ -138,6 +149,11 @@ func (s *sP2P) joinGlobalDHT(ctx context.Context, localHost host.Host) (*dht.Ipf
 		if !success {
 			g.Log().Debugf(ctx, "所有本地种子节点连接失败")
 		}
+	}
+
+	if !success {
+		g.Log().Debug(ctx, "所有本地种子节点连接失败，私有网络启动失败")
+		return nil, fmt.Errorf("所有本地种子节点连接失败") // 连接失败时终止DHT启动
 	}
 
 	//if !success {
@@ -174,8 +190,22 @@ func (s *sP2P) joinGlobalDHT(ctx context.Context, localHost host.Host) (*dht.Ipf
 	//	}
 	//}
 
+	//// 4. 执行Bootstrap，加入私有网络
+	//bootstrapCfg := bootstrap.BootstrapConfig{
+	//	BootstrapPeers: func() []peer.AddrInfo {
+	//		seedPeers, _ := s.parseSeedNodes(s.dht.bootstrapPeers)
+	//		return seedPeers
+	//	}, // 私有Bootstrap节点列表
+	//	//MinPeers:      1,              // 至少连接1个Bootstrap节点
+	//	Period: 30 * time.Second, // 禁用定期重连
+	//	//ConnectionMgr: connMgr,        // 关联连接管理器
+	//}
+	//if _, err = bootstrap.Bootstrap(localHost.ID(), localHost, kadDHT, bootstrapCfg); err != nil {
+	//	return nil, fmt.Errorf("节点Bootstrap失败: %v", err)
+	//}
+
 	// 启动 DHT（自动发现其他节点，构建路由表，脱离对官方节点的依赖,带超时，避免阻塞）
-	bootCtx, bootCancel := context.WithTimeout(ctx, 30*time.Second)
+	bootCtx, bootCancel := context.WithTimeout(ctx, 60*time.Second)
 	err = kadDHT.Bootstrap(bootCtx)
 	bootCancel()
 	if err != nil {
@@ -215,7 +245,7 @@ func (s *sP2P) FindFromDHT(ctx context.Context, key string) (string, error) {
 	g.Log().Debugf(ctx, "FindFromDHT key: %s", key)
 
 	// 1. 先检查本地是否存储了数据（本地节点可能已保存）
-	localCtx, localCancel := context.WithTimeout(ctx, 5*time.Second)
+	localCtx, localCancel := context.WithTimeout(ctx, 10*time.Second)
 	defer localCancel()
 	localValue, err := s.dht.KadDHT.GetValue(localCtx, key)
 	if err == nil {
@@ -226,8 +256,6 @@ func (s *sP2P) FindFromDHT(ctx context.Context, key string) (string, error) {
 
 	// 2. 多次重试网络查找
 	for i := 0; i < maxRetries; i++ {
-		//ctx2, cancel := context.WithTimeout(ctx, 120*time.Second) // 本地测试超时短一些
-		//defer cancel()
 		findCtx, findCancel := context.WithTimeout(ctx, 60*time.Second)
 		g.Log().Debugf(findCtx, "🔍 第%d次查找（共%d次）...", i+1, maxRetries)
 		value, err2 := s.dht.KadDHT.GetValue(findCtx, key)
@@ -267,32 +295,17 @@ func (s *sP2P) printRoutingTable(ctx context.Context, kadDHT *dht.IpfsDHT, inter
 	}
 }
 
-//// 定期打印节点状态（公网地址+路由表）
-//func (s *sP2P) printStatus(interval time.Duration) {
-//	ticker := time.NewTicker(interval)
-//	for {
-//		<-ticker.C
-//		//publicIp, err := service.P2P().GetIPv4PublicIP()
-//		//publicAddrs := s.getPublicAddrs()
-//		peers := s.dht.KadDHT.RoutingTable().ListPeers()
-//		fmt.Printf("\n===== 节点状态 =====")
-//		fmt.Printf("\n公网地址数: %d（0表示穿透失败）\n", len(publicAddrs))
-//		fmt.Printf("路由表节点数: %d（自动扩散结果）\n", len(peers))
-//		fmt.Println("====================")
-//	}
-//}
-
 // 打印节点地址（供其他节点手动加入时使用）
 func (s *sP2P) printNodeAddrs(host host.Host) {
 	fmt.Println("节点地址（公网地址将自动同步到DHT）:")
 	for _, addr := range host.Addrs() {
 		fullAddr := fmt.Sprintf("%s/p2p/%s", addr, host.ID())
 		ipStr, _ := addr.ValueForProtocol(multiaddr.P_IP4)
-		ip := net.ParseIP(ipStr)
-		if ip.IsPrivate() || ip.IsLoopback() {
-			fmt.Printf("  [内网] %s\n", fullAddr)
+		ipObj := net.ParseIP(ipStr)
+		if ipObj.IsPrivate() || ipObj.IsLoopback() {
+			fmt.Printf("%s\n", fullAddr)
 		} else {
-			fmt.Printf("  [公网] %s\n", fullAddr)
+			fmt.Printf("%s\n", fullAddr)
 		}
 	}
 }
