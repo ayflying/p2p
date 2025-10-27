@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gorilla/websocket"
 	"github.com/libp2p/go-libp2p/core/host"
 )
 
@@ -28,6 +29,12 @@ type (
 		// FindFromDHT 从 DHT 查找数据（从网络节点获取）
 		FindFromDHT(ctx context.Context, key string) (string, error)
 		GatewayStart(ctx context.Context, group *ghttp.RouterGroup) (err error)
+		// 发送错误消息
+		SendError(conn *websocket.Conn, errMsg string)
+		// SendAll 发送消息给所有客户端
+		SendAll(typ string, data any) (err error)
+		// Send 发送消息给指定客户端
+		Send(conn *websocket.Conn, typ string, data any) (err error)
 		// 只获取IPv4公网IP（过滤IPv6结果）
 		GetIPv4PublicIP() (string, error)
 	}

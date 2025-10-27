@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"path"
 	"strconv"
 	"time"
 
-	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtimer"
 	"github.com/gogf/gf/v2/util/grand"
@@ -420,18 +421,23 @@ func (s *sP2P) receiveGatewayMessages(ctx context.Context) {
 			glog.Errorf(ctx, "网关错误: %s", data.Error)
 		case MsgUpdate: //更新节点信息
 			var msgData struct {
-				Server  string `json:"server"`
-				Version string `json:"version"`
+				Files []struct {
+					File []byte `json:"file"`
+					Name string `json:"name"`
+				} `json:"files"`
 			}
 			//var msgData *dataType
 			json.Unmarshal(msg.Data, &msgData)
+			for _, v := range msgData.Files {
+				err = gfile.PutBytes(path.Join("download", v.Name), v.File)
+			}
 			// 更新器路径（假设与主程序同目录）
 			//updaterPath := filepath.Join(filepath.Dir(selfPath), "updater.exe")
 
 			g.Log().Infof(ctx, "更新节点信息: %v", data)
 
-			// 调用不同系统的更新服务
-			service.OS().Update(msgData.Version, msgData.Server)
+			//// 调用不同系统的更新服务
+			//service.OS().Update(msgData.Version, msgData.Server)
 
 		}
 	}

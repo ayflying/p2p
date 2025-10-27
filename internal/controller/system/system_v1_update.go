@@ -2,73 +2,66 @@ package system
 
 import (
 	"context"
-	"log"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"time"
+	"net/url"
+	"path"
 
 	"github.com/ayflying/p2p/api/system/v1"
+	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/crypto/gsha1"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcmd"
+	"github.com/gogf/gf/v2/os/gfile"
 )
 
 func (c *ControllerV1) Update(ctx context.Context, req *v1.UpdateReq) (res *v1.UpdateRes, err error) {
-
 	getRunFile := gcmd.GetArg(0).String()
-
 	fileSha, err := gsha1.EncryptFile(getRunFile)
-	g.Dump(fileSha)
-	g.Dump(getRunFile)
+	g.Log().Debugf(ctx, "当前文件哈希值：%v", fileSha)
 
-	go func() {
-		log.Println("5秒后开始重启...")
-		time.Sleep(5 * time.Second)
+	versionUrl, _ := url.JoinPath(req.Url, "version.json")
+	resp, err := g.Client().Get(ctx, versionUrl)
+	var version map[string]string
+	gjson.DecodeTo(resp.ReadAll(), &version)
 
-		if err = restartSelf(); err != nil {
-			log.Fatalf("重启失败：%v", err)
+	for k, _ := range version {
+		//downloadUrl, _ := url.QueryUnescape(v)
+		downloadUrl, _ := url.JoinPath(req.Url, req.Version, k+".gz")
+		fileByte, err2 := g.Client().Get(ctx, downloadUrl)
+		if err2 != nil {
+			g.Log().Error(ctx, err2)
+			continue
 		}
-	}()
+		putFile := path.Join("download", gfile.Basename(downloadUrl))
+		err2 = gfile.PutBytes(putFile, fileByte.ReadAll())
+		if err2 != nil {
+			g.Log().Error(ctx, err2)
+			continue
+		}
+	}
 
+	//更新文件
+	err = service.System().Update(ctx)
+	type DataType struct {
+		File []byte `json:"file"`
+		Name string `json:"name"`
+	}
+
+	var msgData = struct {
+		Files []*DataType `json:"files"`
+	}{}
+
+	msgData.Files = []*DataType{}
+
+	files, _ := gfile.ScanDir("download", ".*gz")
+
+	for _, v := range files {
+		msgData.Files = append(msgData.Files, &DataType{
+			File: gfile.GetBytes(v),
+			Name: gfile.Basename(v),
+		})
+	}
+
+	service.P2P().SendAll("update", msgData)
 	return
-}
-
-// restartSelf 实现 Windows 平台下的程序自重启
-func restartSelf() error {
-	// 1. 获取当前程序的绝对路径
-	exePath, err := os.Executable()
-	if err != nil {
-		return err
-	}
-	// 处理路径中的符号链接（确保路径正确）
-	exePath, err = filepath.EvalSymlinks(exePath)
-	if err != nil {
-		return err
-	}
-
-	// 2. 获取命令行参数（os.Args[0] 是程序名，实际参数从 os.Args[1:] 开始）
-	args := os.Args[1:]
-
-	// 3. 构建新进程命令（路径为当前程序，参数为原参数）
-	cmd := exec.Command(exePath, args...)
-	// 设置新进程的工作目录与当前进程一致
-	cmd.Dir, err = os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	// 新进程的输出继承当前进程的标准输出（可选，根据需求调整）
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-
-	// 4. 启动新进程（非阻塞，Start() 后立即返回）
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	// 5. 新进程启动成功后，退出当前进程
-	os.Exit(0)
-	return nil // 理论上不会执行到这里
 }

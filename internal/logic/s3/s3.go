@@ -58,7 +58,10 @@ func New(_name ...string) *sS3 {
 	if len(_name) > 0 {
 		name = _name[0]
 	} else {
-		getName, _ := g.Cfg("local").Get(gctx.New(), "s3.type")
+		getName, err := g.Cfg("local").Get(gctx.New(), "s3.type")
+		if err != nil {
+			return nil
+		}
 		name = getName.String()
 	}
 

@@ -41,13 +41,14 @@ var (
 			// 拼接操作系统和架构（格式：OS_ARCH）
 			platform := fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)
 
-			var versionFile = make(map[string]string)
+			rootDir := "server_update"
 
+			var versionFile = make(map[string]string)
 			var filePath = path.Join(pathMain, version, platform, name)
 			dirList, _ := gfile.ScanDir(path.Join(pathMain, version), "*", false)
 			for _, v := range dirList {
 				updatePlatform := gfile.Name(v)
-				updateFilePath := path.Join("server_update", name, version, updatePlatform)
+				updateFilePath := path.Join(rootDir, name, version, updatePlatform)
 
 				var obj bytes.Buffer
 				g.Log().Debugf(ctx, "读取目录成功:%v", v)
@@ -70,14 +71,14 @@ var (
 
 				// 写入文件版本文件
 				fileByte := gjson.MustEncode(versionFile)
-				service.S3().PutObject(ctx, bytes.NewReader(fileByte), path.Join("server_update", name, "version.json"))
+				service.S3().PutObject(ctx, bytes.NewReader(fileByte), path.Join(rootDir, name, "version.json"))
 				if err != nil {
 					g.Log().Error(ctx, err)
 				}
 			}
 			g.Log().Debugf(ctx, "当前获取到的地址为：%v", filePath)
 
-			versionUrl := service.S3().GetCdnUrl(path.Join("server_update", name, "version.json"))
+			versionUrl := service.S3().GetCdnUrl(path.Join(rootDir, name))
 			listVar := g.Cfg().MustGet(ctx, "p2p.list")
 			var p2pItem []struct {
 				Host string `json:"host"`
@@ -96,7 +97,8 @@ var (
 
 				g.Log().Debugf(ctx, "开始上传到服务器：%v,file=%v", url, versionUrl)
 				_, err := g.Client().Get(ctx, url, systemV1.UpdateReq{
-					Url: versionUrl,
+					Url:     versionUrl,
+					Version: version,
 				})
 				if err != nil {
 					g.Log().Error(ctx, err)

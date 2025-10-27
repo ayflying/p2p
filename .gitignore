@@ -18,4 +18,6 @@ temp.yaml
 bin
 **/config/config.yaml
 v1.0.0/
-manifest/config/local.yaml
+config/local.yaml
+main.exe~
+download/

@@ -26,8 +26,8 @@ var (
 
 // 常量定义
 const (
-	ProtocolID  string = "/ay"
-	DefaultPort        = 51888
+	ProtocolID string = "/ay"
+	//DefaultPort        = 51888
 )
 
 var (

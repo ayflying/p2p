@@ -74,9 +74,6 @@ var (
 			case "client":
 				// 获取客户端模式所需的参数
 				g.Log().Debug(ctx, "开始执行client")
-				//addrs := []string{"/ip4/127.0.0.1/tcp/51888", "/ip4/192.168.50.173/tcp/51888"}
-				//addr := "/ip4/192.168.50.173/tcp/51888/p2p/12D3KooWJKBB9bF9MjqgsFYUUsPBG249FDq7a3ZdaYc9iw8G78JQ"
-				//addrs := "WyIvaXA0LzEyNy4wLjAuMS90Y3AvNTE4ODgiLCIvaXA0LzE5Mi4xNjguNTAuMTczL3RjcC81MTg4OCJd"
 				wsStr := "ws://192.168.50.173:51888/ws"
 				err = service.P2P().Start(wsStr)
 			case "dht":

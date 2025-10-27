@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/ayflying/p2p/internal/consts"
@@ -13,6 +14,7 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gtimer"
+	"github.com/gogf/gf/v2/util/grand"
 )
 
 func init() {
@@ -47,7 +49,24 @@ var (
 			})
 			addr := g.Cfg().MustGet(ctx, "ws.address").String()
 			ws := parser.GetOpt("ws", addr).String()
-			//port := parser.GetOpt("port", 0).Int()
+			if ws == "" {
+				listVar := g.Cfg().MustGet(ctx, "p2p.list")
+				var p2pItem []struct {
+					Host string `json:"host"`
+					Port int    `json:"port"`
+					SSL  bool   `json:"ssl"`
+					Ws   string `json:"ws"`
+				}
+				listVar.Scan(&p2pItem)
+				key := grand.Intn(len(p2pItem) - 1)
+				wsData := p2pItem[key]
+				ws = fmt.Sprintf("ws://%s:%d/ws", wsData.Host, wsData.Port)
+			}
+
+			port := parser.GetOpt("port", 0).Int()
+			if port > 0 {
+				s.SetPort(port)
+			}
 
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.Middleware(ghttp.MiddlewareHandlerResponse)
@@ -66,8 +85,6 @@ var (
 				}
 			})
 
-			//s.SetPort(port)
-
 			// 延迟启动
 			gtimer.SetTimeout(ctx, time.Second*5, func(ctx context.Context) {
 				g.Log().Debug(ctx, "开始执行客户端")
@@ -75,12 +92,6 @@ var (
 				err = service.P2P().Start(ws)
 
 				g.Log().Debugf(ctx, "当前监听端口:%v", s.GetListenedPort())
-				//addrs, _ := net.InterfaceAddrs()
-				//for _, addr := range addrs {
-				//	if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
-				//		g.Log().Infof(ctx, "访问地址:http://%v:%d", ipnet.IP.String(), s.GetListenedPort())
-				//	}
-				//}
 
 			})
 
