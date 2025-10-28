@@ -140,7 +140,7 @@ func (s *sP2P) handleRegister(ctx context.Context, conn *websocket.Conn, msg *Ga
 	s.Clients[msg.From] = client
 	s.lock.Unlock()
 
-	glog.Infof(ctx, "客户端 ip=%s,%s 注册成功，PeerID: %s", conn.RemoteAddr(), msg.From, data.PeerID)
+	g.Log().Infof(ctx, "客户端 ip=%s,%s 注册成功，PeerID: %s", conn.RemoteAddr(), msg.From, data.PeerID)
 
 	// 发送注册成功响应
 	err := s.sendMessage(conn, &GatewayMessage{

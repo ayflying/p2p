@@ -40,12 +40,12 @@ func (c *ControllerV1) Update(ctx context.Context, req *v1.UpdateReq) (res *v1.U
 		}
 	}
 
-	//更新文件
-	err = service.System().Update(ctx)
 	type DataType struct {
 		File []byte `json:"file"`
 		Name string `json:"name"`
 	}
+
+	//var GatewayMessage *p2p.GatewayMessage
 
 	var msgData = struct {
 		Files []*DataType `json:"files"`
@@ -53,7 +53,7 @@ func (c *ControllerV1) Update(ctx context.Context, req *v1.UpdateReq) (res *v1.U
 
 	msgData.Files = []*DataType{}
 
-	files, _ := gfile.ScanDir("download", ".*gz")
+	files, _ := gfile.ScanDir("download", "*.gz")
 
 	for _, v := range files {
 		msgData.Files = append(msgData.Files, &DataType{
@@ -63,5 +63,8 @@ func (c *ControllerV1) Update(ctx context.Context, req *v1.UpdateReq) (res *v1.U
 	}
 
 	service.P2P().SendAll("update", msgData)
+
+	//更新自己的文件
+	//err = service.System().Update(ctx)
 	return
 }

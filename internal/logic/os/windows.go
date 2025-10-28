@@ -14,6 +14,14 @@ import (
 	"github.com/gogf/gf/v2/os/gfile"
 )
 
+// 引入 Windows API 函数
+var (
+	user32        = syscall.NewLazyDLL("user32.dll")
+	kernel32      = syscall.NewLazyDLL("kernel32.dll")
+	showWindow    = user32.NewProc("ShowWindow")
+	getConsoleWnd = kernel32.NewProc("GetConsoleWindow")
+)
+
 func (s *sOS) start() {
 
 	// 系统托盘初始化（设置图标、右键菜单）
@@ -22,6 +30,7 @@ func (s *sOS) start() {
 
 // 系统托盘初始化（设置图标、右键菜单）
 func (s *sOS) onSystrayReady() {
+	//s.hideConsole()
 
 	iconByte := gfile.GetBytes(s.systray.Icon)
 	systray.SetIcon(iconByte)
@@ -29,7 +38,7 @@ func (s *sOS) onSystrayReady() {
 	systray.SetTooltip(s.systray.Tooltip)
 
 	mQuit := systray.AddMenuItem("退出", "退出应用")
-	systray.AddMenuItemCheckbox("隐藏窗口", "隐藏窗口", false)
+	mShow := systray.AddMenuItemCheckbox("显示窗口", "显示窗口", false)
 	// Sets the icon of a menu item. Only available on Mac and Windows.
 	//mQuit.SetIcon(iconByte)
 	go func() {
@@ -37,6 +46,9 @@ func (s *sOS) onSystrayReady() {
 			select {
 			case <-mQuit.ClickedCh:
 				systray.Quit()
+			case <-mShow.ClickedCh:
+				// 显示窗口
+				s.showConsole()
 			}
 
 		}
@@ -61,4 +73,26 @@ func (s *sOS) update(version, server string) {
 	if err := cmd.Start(); err != nil {
 		return
 	}
+}
+
+// 隐藏控制台窗口
+func (s *sOS) hideConsole() {
+	// 获取当前控制台窗口句柄
+	hWnd, _, _ := getConsoleWnd.Call()
+	if hWnd == 0 {
+		return // 无控制台窗口（如编译为GUI子系统时）
+	}
+	// SW_HIDE = 0：隐藏窗口
+	showWindow.Call(hWnd, 0)
+}
+
+// 显示控制台窗口
+func (s *sOS) showConsole() {
+	// 获取当前控制台窗口句柄
+	hWnd, _, _ := getConsoleWnd.Call()
+	if hWnd == 0 {
+		return
+	}
+	// SW_SHOW = 5：显示窗口
+	showWindow.Call(hWnd, 5)
 }

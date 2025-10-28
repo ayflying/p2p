@@ -38,17 +38,13 @@ var (
 			s := g.Server(consts.Name)
 
 			parser, err = gcmd.Parse(g.MapStrBool{
-				"p,port": true,
-			})
-			//port := parser.GetOpt("port", "23333").Int()
-
-			parser, err = gcmd.Parse(g.MapStrBool{
 				"w,ws":      true,
 				"g,gateway": true,
 				"p,port":    true,
+				"t,type":    true,
 			})
-			addr := g.Cfg().MustGet(ctx, "ws.address").String()
-			ws := parser.GetOpt("ws", addr).String()
+			//addr := g.Cfg().MustGet(ctx, "ws.address").String()
+			ws := parser.GetOpt("ws").String()
 			if ws == "" {
 				listVar := g.Cfg().MustGet(ctx, "p2p.list")
 				var p2pItem []struct {
@@ -64,9 +60,10 @@ var (
 			}
 
 			port := parser.GetOpt("port", 0).Int()
-			if port > 0 {
-				s.SetPort(port)
-			}
+			s.SetPort(port)
+			//if port > 0 {
+			//	s.SetPort(port)
+			//}
 
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.Middleware(ghttp.MiddlewareHandlerResponse)
@@ -85,15 +82,18 @@ var (
 				}
 			})
 
-			// 延迟启动
-			gtimer.SetTimeout(ctx, time.Second*5, func(ctx context.Context) {
-				g.Log().Debug(ctx, "开始执行客户端")
-				// 启动p2p客户端
-				err = service.P2P().Start(ws)
+			startType := parser.GetOpt("type").String()
+			if startType != "server" {
+				// 延迟启动
+				gtimer.SetTimeout(ctx, time.Second*5, func(ctx context.Context) {
+					g.Log().Debug(ctx, "开始执行客户端")
+					// 启动p2p客户端
+					err = service.P2P().Start(ws)
 
-				g.Log().Debugf(ctx, "当前监听端口:%v", s.GetListenedPort())
-
-			})
+					g.Log().Debugf(ctx, "当前监听端口:%v", s.GetListenedPort())
+				})
+				//s.SetPort(0)
+			}
 
 			// 启动系统托盘
 			service.OS().Load(consts.Name, consts.Name+"服务端", "manifest/images/favicon.ico")

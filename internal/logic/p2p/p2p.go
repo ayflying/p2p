@@ -26,7 +26,7 @@ var (
 
 // 常量定义
 const (
-	ProtocolID string = "/ay"
+	ProtocolID string = "/ay/p2p/1.0.0"
 	//DefaultPort        = 51888
 )
 

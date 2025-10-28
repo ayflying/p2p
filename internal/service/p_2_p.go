@@ -37,6 +37,8 @@ type (
 		Send(conn *websocket.Conn, typ string, data any) (err error)
 		// 只获取IPv4公网IP（过滤IPv6结果）
 		GetIPv4PublicIP() (string, error)
+		ProxyInit()
+		Tcp(key string, toPort int, myPort int, ip string)
 	}
 )
 

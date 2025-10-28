@@ -1,0 +1,5 @@
+#tcp:
+#  - key: "12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26"
+#    port: 51888
+#    ip: ay.cname.com
+#    local_port: 20000
