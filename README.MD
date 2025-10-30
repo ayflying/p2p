@@ -110,7 +110,7 @@ go build -o message
 
 ## 许可证
 
-[MIT License](https://opensource.org/licenses/MIT)
+本项目使用 MIT 许可证，详见 `LICENSE` 文件。
 
 ## 联系方式
 
@@ -119,4 +119,4 @@ go build -o message
 
 ---
 
-*最后更新时间: 2024-07-15*
+*最后更新时间: 2025-10-30*
