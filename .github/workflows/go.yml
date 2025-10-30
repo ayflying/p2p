@@ -1,0 +1,95 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+
+      - name: Install gf CLI
+        run: |
+          curl -L -o gf https://github.com/gogf/gf/releases/latest/download/gf_linux_amd64
+          chmod +x gf
+          mkdir -p "$HOME/bin"
+          mv gf "$HOME/bin/gf"
+          echo "$HOME/bin" >> $GITHUB_PATH
+
+      - name: Verify gf
+        run: gf -v
+
+      - name: Build with gf
+        run: gf build -ew -v "${{ github.ref_name }}"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2p-${{ github.ref_name }}
+          path: |
+            bin/**
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: p2p-${{ github.ref_name }}
+          path: bin
+
+      - name: Package artifacts
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          # Find all built binaries recursively and package with unique names per platform/arch
+          mapfile -t files < <(find bin -type f \( -name 'p2p' -o -name 'p2p.exe' \))
+          for f in "${files[@]}"; do
+            dir="$(dirname "$f")"
+            base="$(basename "$f")"
+            plat_arch="$(basename "$dir")" # expects linux_amd64, windows_amd64, etc.
+            case "$plat_arch" in
+              windows_*)
+                zip_name="p2p_${{ github.ref_name }}_${plat_arch}.zip"
+                (cd "$dir" && zip -9 "${GITHUB_WORKSPACE}/dist/${zip_name}" "$base")
+                ;;
+              *)
+                tar_name="p2p_${{ github.ref_name }}_${plat_arch}.tar.gz"
+                (cd "$dir" && tar -czf "${GITHUB_WORKSPACE}/dist/${tar_name}" "$base")
+                ;;
+            esac
+          done
+          # Checksums
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+          ls -al dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            dist/*
