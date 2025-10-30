@@ -24,6 +24,8 @@ import (
 )
 
 // 本地版本号（建议从编译参数注入，如 -ldflags "-X main.version=v0.1.3"）
+const versionFile = "version.txt"
+
 var localVersion = "v0.0.0"
 
 // 对应 GitHub API 响应的核心字段（按需精简）
@@ -59,6 +61,8 @@ func (s *sSystem) Update(ctx context.Context, gzFile string) (err error) {
 	if gzFile == "" {
 		gzFile = path.Join("download", platform+".gz")
 	}
+	//结束后删除压缩包
+	defer gfile.RemoveFile(gzFile)
 
 	ext := gfile.Ext(gzFile)
 	if ext == ".zip" {
@@ -198,7 +202,7 @@ func (s *sSystem) CheckUpdate() (err error) {
 		return
 	}
 
-	localVersion = gfile.GetContents("download/version.txt")
+	localVersion = gfile.GetContents(versionFile)
 
 	if s.isNewVersion(localVersion, latestVersion) {
 		g.Log().Printf(ctx, "发现新版本：%s（当前版本：%s）", latestVersion, localVersion)
@@ -223,7 +227,7 @@ func (s *sSystem) CheckUpdate() (err error) {
 					return
 				}
 				// 保存最新版本号到文件
-				gfile.PutContents("download/version.txt", latestVersion)
+				gfile.PutContents(versionFile, latestVersion)
 				break
 			}
 		}
