@@ -65,7 +65,7 @@ func (s *sSystem) Update(ctx context.Context, gzFile string) (err error) {
 		gzFile = path.Join("download", platform+".gz")
 	}
 	//结束后删除压缩包
-	//defer gfile.RemoveFile(gzFile)
+	defer gfile.RemoveFile(gzFile)
 
 	ext := gfile.Ext(gzFile)
 	if ext == ".zip" {
