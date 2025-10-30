@@ -1,8 +1,11 @@
 package system
 
 import (
+	"context"
+
 	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gcron"
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
@@ -17,6 +20,14 @@ func init() {
 
 	getDev, _ := g.Cfg().GetWithEnv(gctx.New(), "dev")
 	if !getDev.Bool() {
+		// 每天0点检查更新
+		gcron.Add(gctx.New(), "0 0 0 * * *", func(ctx context.Context) {
+			err := service.System().CheckUpdate()
+			if err != nil {
+				g.Log().Errorf(ctx, "检查更新失败：%v", err)
+			}
+		})
+
 		err := service.System().CheckUpdate()
 		if err != nil {
 			g.Log().Errorf(gctx.New(), "检查更新失败：%v", err)
