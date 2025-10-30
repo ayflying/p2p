@@ -26,4 +26,4 @@ func init() {
 	}
 }
 
-func (system *sSystem) Init() {}
+func (s *sSystem) Init() {}

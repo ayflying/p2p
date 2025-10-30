@@ -17,6 +17,7 @@ import (
 	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/encoding/gcompress"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gfile"
@@ -84,6 +85,16 @@ func (s *sSystem) Update(ctx context.Context, gzFile string) (err error) {
 
 // RestartSelf 实现 Windows 平台下的程序自重启
 func (s *sSystem) RestartSelf() error {
+	ctx := gctx.New()
+	// 判断是否为linux平台
+	if runtime.GOOS == "linux" {
+		err := ghttp.RestartAllServer(ctx, os.Args[0])
+		if err != nil {
+			g.Log().Errorf(ctx, "重启失败：%v", err)
+		}
+		return err
+	}
+
 	// 1. 获取当前程序的绝对路径
 	exePath, err := os.Executable()
 	if err != nil {
