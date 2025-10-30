@@ -10,7 +10,6 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/gtime"
-
 	//步骤1：加载驱动
 	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
@@ -24,7 +23,7 @@ var (
 
 func main() {
 	g.Log().Infof(ctx, "启动文件最后修改时间:%v", gtime.New(gfile.MTime(gcmd.GetArg(0).String())).String())
-	g.Dump("v1.0.0.2")
+	//g.Dump("v1.0.0.2")
 
 	if ok := gfile.Exists("runtime"); !ok {
 		gfile.Mkdir("runtime")

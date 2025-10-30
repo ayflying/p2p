@@ -1,9 +1,12 @@
 package system
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -62,15 +65,15 @@ func (s *sSystem) Update(ctx context.Context, gzFile string) (err error) {
 		gzFile = path.Join("download", platform+".gz")
 	}
 	//结束后删除压缩包
-	defer gfile.RemoveFile(gzFile)
+	//defer gfile.RemoveFile(gzFile)
 
 	ext := gfile.Ext(gzFile)
 	if ext == ".zip" {
 		g.Log().Debugf(ctx, "zip解压%v到%v", gzFile, gfile.Dir(runFile))
 		err = gcompress.UnZipFile(gzFile, gfile.Dir(runFile))
 	} else {
-		g.Log().Debugf(ctx, "gzip解压%v到%v", gzFile, runFile)
-		err = gcompress.UnGzipFile(gzFile, runFile)
+		g.Log().Debugf(ctx, "gzip解压%v到%v", gzFile, gfile.Dir(runFile))
+		err = s.UnTarGz(gzFile, gfile.Dir(runFile))
 	}
 	if err != nil {
 		return
@@ -84,6 +87,64 @@ func (s *sSystem) Update(ctx context.Context, gzFile string) (err error) {
 			log.Fatalf("重启失败：%v", err)
 		}
 	}()
+	return
+}
+
+// UnTarGz 解压tar.gz文件到指定目录
+func (s *sSystem) UnTarGz(tarGzFileName, targetDir string) (err error) {
+	// 打开tar.gz文件
+	file, err := os.Open(tarGzFileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// 创建gzip reader
+	gzr, err := gzip.NewReader(file)
+	if err != nil {
+		return err
+	}
+	defer gzr.Close()
+
+	// 创建tar reader
+	tr := tar.NewReader(gzr)
+
+	// 遍历tar中的每个文件
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			// 到达文件末尾，退出循环
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		// 构建解压后的文件路径
+		targetPath := targetDir + string(os.PathSeparator) + hdr.Name
+
+		// 如果是目录，创建目录
+		if hdr.Typeflag == tar.TypeDir {
+			err := os.MkdirAll(targetPath, 0755)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		// 如果是文件，创建文件并写入内容
+		outFile, err := os.Create(targetPath)
+		if err != nil {
+			return err
+		}
+		defer outFile.Close()
+
+		_, err = io.Copy(outFile, tr)
+		if err != nil {
+			return err
+		}
+	}
+
 	return
 }
 
