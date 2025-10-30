@@ -16,7 +16,6 @@ manifest/output/
 temp/
 temp.yaml
 bin
-**/config/config.yaml
 v1.0.0/
 config/local.yaml
 main.exe~
