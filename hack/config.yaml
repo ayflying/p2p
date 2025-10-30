@@ -4,8 +4,8 @@
 gfcli:
   build:
     name: "p2p"
-    arch: "amd64"
-    system: "windows,linux"
+    arch: "amd64,arm,arm64"
+    system: "windows,linux,darwin"
     mod: "none"
     packSrc: "hack,resource,manifest"
     # version: "v1.0.0"
