@@ -17,7 +17,7 @@ type (
 		RestartSelf() error
 		// RenameRunningFile 重命名正在运行的程序文件（如 message.exe → message.exe~）
 		RenameRunningFile(exePath string) (string, error)
-		CheckUpdate()
+		CheckUpdate() (err error)
 	}
 )
 

@@ -60,10 +60,15 @@ func (s *sSystem) Update(ctx context.Context, gzFile string) (err error) {
 	}
 
 	ext := gfile.Ext(gzFile)
-	if ext == "zip" {
-		err = gcompress.UnZipFile(gzFile, runFile)
+	if ext == ".zip" {
+		g.Log().Debugf(ctx, "zip解压%v到%v", gzFile, gfile.Dir(runFile))
+		err = gcompress.UnZipFile(gzFile, gfile.Dir(runFile))
 	} else {
+		g.Log().Debugf(ctx, "gzip解压%v到%v", gzFile, runFile)
 		err = gcompress.UnGzipFile(gzFile, runFile)
+	}
+	if err != nil {
+		return
 	}
 
 	go func() {
@@ -174,7 +179,7 @@ func (s *sSystem) getLatestVersion() (string, []*Assets, error) {
 	return release.TagName, release.Assets, nil
 }
 
-func (s *sSystem) CheckUpdate() {
+func (s *sSystem) CheckUpdate() (err error) {
 	ctx := gctx.New()
 	latestVersion, assets, err := s.getLatestVersion()
 	if err != nil {
@@ -214,4 +219,5 @@ func (s *sSystem) CheckUpdate() {
 	} else {
 		fmt.Printf("当前已是最新版本：%s\n", localVersion)
 	}
+	return
 }

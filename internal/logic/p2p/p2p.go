@@ -188,9 +188,10 @@ func (s *sP2P) removeDuplicates(strs []string) []string {
 	return result
 }
 
+const privKeyPath = "runtime/p2p.key"
+
 // 生成固定密钥（核心：通过固定种子生成相同密钥）
 func (s *sP2P) generateFixedKey() (crypto.PrivKey, error) {
-	privKeyPath := "runtime/message.key"
 	if ok := gfile.Exists(privKeyPath); ok {
 		// 从文件读取密钥
 		keyBytes := gfile.GetBytes(privKeyPath)

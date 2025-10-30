@@ -17,7 +17,10 @@ func init() {
 
 	getDev, _ := g.Cfg().GetWithEnv(gctx.New(), "dev")
 	if !getDev.Bool() {
-		service.System().CheckUpdate()
+		err := service.System().CheckUpdate()
+		if err != nil {
+			g.Log().Errorf(gctx.New(), "检查更新失败：%v", err)
+		}
 	} else {
 		g.Log().Debugf(gctx.New(), "开发模式，不检查更新")
 	}
