@@ -456,7 +456,7 @@ func (s *sP2P) receiveGatewayMessages(ctx context.Context) {
 
 			g.Log().Info(ctx, "文件接收完成")
 			// 开始覆盖文件与重启
-			err = service.System().Update(ctx)
+			err = service.System().Update(ctx, "")
 
 			//// 调用不同系统的更新服务
 			//service.OS().Update(msgData.Version, msgData.Server)

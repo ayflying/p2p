@@ -48,15 +48,23 @@ type GitHubRelease struct {
 	Body            string    `json:"body"`
 }
 
-func (s *sSystem) Update(ctx context.Context) (err error) {
+func (s *sSystem) Update(ctx context.Context, gzFile string) (err error) {
 	//拼接操作系统和架构（格式：OS_ARCH）
 	platform := fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)
 
 	runFile := gcmd.GetArg(0).String()
 	oldFile, err := service.System().RenameRunningFile(runFile)
 	g.Log().Debugf(ctx, "执行文件改名为%v", oldFile)
-	gz := path.Join("download", platform+".gz")
-	err = gcompress.UnGzipFile(gz, runFile)
+	if gzFile == "" {
+		gzFile = path.Join("download", platform+".gz")
+	}
+
+	ext := gfile.Ext(gzFile)
+	if ext == "zip" {
+		err = gcompress.UnZipFile(gzFile, runFile)
+	} else {
+		err = gcompress.UnGzipFile(gzFile, runFile)
+	}
 
 	go func() {
 		log.Println("5秒后开始重启...")
@@ -186,13 +194,18 @@ func (s *sSystem) CheckUpdate() {
 			if strings.Contains(fmt.Sprintf("_%s.", asset.Name), platform) {
 				fmt.Printf("- %s\n", asset.BrowserDownloadUrl)
 
+				// 下载更新文件
 				fileDownload, err2 := g.Client().Get(ctx, asset.BrowserDownloadUrl)
 				if err2 != nil {
 					return
 				}
-				//filename := gfile.Name()
-				err = gfile.PutBytes(path.Join("download", asset.Name), fileDownload.ReadAll())
+				updateFile := path.Join("download", asset.Name)
+				err = gfile.PutBytes(updateFile, fileDownload.ReadAll())
 
+				err = s.Update(ctx, updateFile)
+				if err != nil {
+					return
+				}
 				// 保存最新版本号到文件
 				gfile.PutContents("download/version.txt", latestVersion)
 				break
