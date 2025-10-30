@@ -30,7 +30,7 @@
 
 ```bash
 git clone https://github.com/ayflying/p2p.git
-cd p2p
+cd message
 ```
 
 ### 安装依赖
@@ -42,13 +42,13 @@ go mod tidy
 ### 构建项目
 
 ```bash
-go build -o p2p
+go build -o message
 ```
 
 ### 运行项目
 
 ```bash
-./p2p
+./message
 ```
 
 ## 目录结构
@@ -90,7 +90,7 @@ go build -o p2p
 项目提供了命令行工具，支持节点管理、网络状态查询等功能。
 
 ```bash
-./p2p --help  # 查看帮助信息
+./message --help  # 查看帮助信息
 ```
 
 ## 开发指南

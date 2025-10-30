@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/net/gtcp"
 	"github.com/gorilla/websocket"
 	"github.com/libp2p/go-libp2p/core/host"
 )
@@ -38,7 +39,9 @@ type (
 		// 只获取IPv4公网IP（过滤IPv6结果）
 		GetIPv4PublicIP() (string, error)
 		ProxyInit()
+		TcpAck(port int) *gtcp.Conn
 		Tcp(key string, toPort int, myPort int, ip string)
+		Http(key string, cname string, toPort int, ip string)
 	}
 )
 

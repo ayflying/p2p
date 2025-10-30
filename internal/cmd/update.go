@@ -79,7 +79,7 @@ var (
 			g.Log().Debugf(ctx, "当前获取到的地址为：%v", filePath)
 
 			versionUrl := service.S3().GetCdnUrl(path.Join(rootDir, name))
-			listVar := g.Cfg().MustGet(ctx, "p2p.list")
+			listVar := g.Cfg().MustGet(ctx, "message.list")
 			var p2pItem []struct {
 				Host string `json:"host"`
 				Port int    `json:"port"`

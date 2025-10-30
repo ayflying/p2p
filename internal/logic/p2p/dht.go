@@ -26,8 +26,8 @@ type DHTType struct {
 
 var (
 //bootstrapPeers = []string{
-//	"/ip4/192.168.50.173/tcp/53486/p2p/12D3KooWE3v9623SLukT9dKUQLjqAJrPvzoyRjoUh5MAVGDg69Rw",
-//	"/ip4/192.168.50.173/udp/53486/quic-v1/p2p/12D3KooWE3v9623SLukT9dKUQLjqAJrPvzoyRjoUh5MAVGDg69Rw",
+//	"/ip4/192.168.50.173/tcp/53486/message/12D3KooWE3v9623SLukT9dKUQLjqAJrPvzoyRjoUh5MAVGDg69Rw",
+//	"/ip4/192.168.50.173/udp/53486/quic-v1/message/12D3KooWE3v9623SLukT9dKUQLjqAJrPvzoyRjoUh5MAVGDg69Rw",
 //}
 )
 
@@ -40,19 +40,19 @@ func (s *sP2P) DHTStart(h host.Host, bootstrapPeers []string) (err error) {
 
 	if len(bootstrapPeers) == 0 {
 		bootstrapPeers = []string{
-			//"/ip4/192.168.50.243/tcp/23333/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
-			//"/ip4/192.168.50.243/udp/23333/quic-v1/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+			//"/ip4/192.168.50.243/tcp/23333/message/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+			//"/ip4/192.168.50.243/udp/23333/quic-v1/message/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
 			//
-			//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
-			//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+			//"/ip4/192.168.50.173/tcp/23333/message/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+			//"/ip4/192.168.50.173/udp/23333/quic-v1/message/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
 
 			//肖晓
-			"/ip4/192.168.50.244/tcp/23333/p2p/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
-			"/ip4/192.168.50.244/udp/23333/quic-v1/p2p/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
+			"/ip4/192.168.50.244/tcp/23333/message/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
+			"/ip4/192.168.50.244/udp/23333/quic-v1/message/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
 
 			//廖玉龙
-			"/ip4/192.168.50.210/tcp/23333/p2p/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
-			"/ip4/192.168.50.210/udp/23333/quic-v1/p2p/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
+			"/ip4/192.168.50.210/tcp/23333/message/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
+			"/ip4/192.168.50.210/udp/23333/quic-v1/message/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
 		}
 
 	}
@@ -299,7 +299,7 @@ func (s *sP2P) printRoutingTable(ctx context.Context, kadDHT *dht.IpfsDHT, inter
 func (s *sP2P) printNodeAddrs(host host.Host) {
 	fmt.Println("节点地址（公网地址将自动同步到DHT）:")
 	for _, addr := range host.Addrs() {
-		fullAddr := fmt.Sprintf("%s/p2p/%s", addr, host.ID())
+		fullAddr := fmt.Sprintf("%s/message/%s", addr, host.ID())
 		ipStr, _ := addr.ValueForProtocol(multiaddr.P_IP4)
 		ipObj := net.ParseIP(ipStr)
 		if ipObj.IsPrivate() || ipObj.IsLoopback() {

@@ -45,7 +45,7 @@ func (c *ControllerV1) Update(ctx context.Context, req *v1.UpdateReq) (res *v1.U
 		Name string `json:"name"`
 	}
 
-	//var GatewayMessage *p2p.GatewayMessage
+	//var GatewayMessage *message.GatewayMessage
 
 	var msgData = struct {
 		Files []*DataType `json:"files"`

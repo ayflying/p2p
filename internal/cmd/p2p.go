@@ -17,15 +17,15 @@ P2P连接工具使用帮助:
 
 模式1: 网关服务器
   功能: 拥有外网IP，接收客户端连接，协助P2P打洞
-  命令: p2p -a gateway
+  命令: message -a gateway
 
 模式2: 客户端
   功能: 连接到网关，通过打洞实现与其他客户端的长连接通讯
-  命令: p2p -a client --gateway 网关ID
+  命令: message -a client --gateway 网关ID
 
 高级功能:
-  客户端间连接: p2p --mode client --gateway 网关ID --action connect --target 目标客户端ID
-  发送消息: p2p -mode client --gateway 网关ID --action send --target 目标客户端ID --message "消息内容"
+  客户端间连接: message --mode client --gateway 网关ID --action connect --target 目标客户端ID
+  发送消息: message -mode client --gateway 网关ID --action send --target 目标客户端ID --message "消息内容"
 `
 
 var (
@@ -33,9 +33,9 @@ var (
 	// 遵循GoFrame的Command对象定义规范，包含名称、用法、简短描述和执行函数
 	P2p = gcmd.Command{
 		// Name 为命令名称
-		Name: "p2p",
+		Name: "message",
 		// Usage 描述命令的基本用法
-		Usage: "p2p [options]",
+		Usage: "message [options]",
 		// Brief 提供命令的简短功能描述
 		Brief: "P2P连接工具，支持网关和客户端模式，实现NAT穿透和点对点通信",
 		// Description 提供命令的详细描述和使用帮助
@@ -81,16 +81,16 @@ var (
 				h, _ := service.P2P().CreateLibp2pHost(ctx, 23333)
 
 				addr := []string{
-					"/ip4/192.168.50.243/tcp/23333/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
-					"/ip4/192.168.50.243/udp/23333/quic-v1/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+					"/ip4/192.168.50.243/tcp/23333/message/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+					"/ip4/192.168.50.243/udp/23333/quic-v1/message/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
 
-					//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
-					//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+					//"/ip4/192.168.50.173/tcp/23333/message/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+					//"/ip4/192.168.50.173/udp/23333/quic-v1/message/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
 
-					//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
-					//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
-					//"/ip4/114.132.176.115/tcp/23333/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
-					//"/ip4/114.132.176.115/udp/23333/quic-v1/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
+					//"/ip4/192.168.50.173/tcp/23333/message/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
+					//"/ip4/192.168.50.173/udp/23333/quic-v1/message/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
+					//"/ip4/114.132.176.115/tcp/23333/message/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
+					//"/ip4/114.132.176.115/udp/23333/quic-v1/message/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
 				}
 
 				err := service.P2P().DHTStart(h, addr)
@@ -112,25 +112,25 @@ var (
 				h, _ := service.P2P().CreateLibp2pHost(ctx, 23333)
 
 				//addr := []string{
-				//	//"/ip4/192.168.50.243/tcp/23333/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
-				//	//"/ip4/192.168.50.243/udp/23333/quic-v1/p2p/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+				//	//"/ip4/192.168.50.243/tcp/23333/message/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
+				//	//"/ip4/192.168.50.243/udp/23333/quic-v1/message/12D3KooWESZtrm6AfqhC3oj5FsAbcSmePwHFFip3F2MPExrxHxwy",
 				//
 				//	//肖晓
-				//	"/ip4/192.168.50.244/tcp/23333/p2p/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
-				//	"/ip4/192.168.50.244/udp/23333/quic-v1/p2p/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
+				//	"/ip4/192.168.50.244/tcp/23333/message/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
+				//	"/ip4/192.168.50.244/udp/23333/quic-v1/message/12D3KooWFAt3hTi2SaYNty4gxxBnLRFxJidRDcf4k8HqCUZZRY1W",
 				//
 				//	//廖玉龙
-				//	"/ip4/192.168.50.210/tcp/23333/p2p/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
-				//	"/ip4/192.168.50.210/udp/23333/quic-v1/p2p/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
+				//	"/ip4/192.168.50.210/tcp/23333/message/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
+				//	"/ip4/192.168.50.210/udp/23333/quic-v1/message/12D3KooWM8eE3i2EWB2wFVGM1URusBPHJrEQJGxKfKgPdxEMm9hn",
 				//
 				//
-				//	//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
-				//	//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+				//	//"/ip4/192.168.50.173/tcp/23333/message/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
+				//	//"/ip4/192.168.50.173/udp/23333/quic-v1/message/12D3KooWKgW8WxncYzZ2h5erMbK3GfLGhNHFapPvhUc1KVmdZeRg",
 				//
-				//	//"/ip4/192.168.50.173/tcp/23333/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
-				//	//"/ip4/192.168.50.173/udp/23333/quic-v1/p2p/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
-				//	//"/ip4/114.132.176.115/tcp/23333/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
-				//	//"/ip4/114.132.176.115/udp/23333/quic-v1/p2p/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
+				//	//"/ip4/192.168.50.173/tcp/23333/message/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
+				//	//"/ip4/192.168.50.173/udp/23333/quic-v1/message/12D3KooWQsb1137nCzqbMMCzwHsyU8aaCZeFnBUBTkWVsfp8gs26",
+				//	//"/ip4/114.132.176.115/tcp/23333/message/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
+				//	//"/ip4/114.132.176.115/udp/23333/quic-v1/message/12D3KooWJQMiYyptqSrx4PPsGLY9hjLbaDdxmBXmGtKmSWuiP79D",
 				//}
 
 				addrVar, err := g.Cfg().Get(ctx, "dht.addrs")

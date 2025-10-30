@@ -15,7 +15,7 @@ type (
 		Update(ctx context.Context) (err error)
 		// RestartSelf 实现 Windows 平台下的程序自重启
 		RestartSelf() error
-		// RenameRunningFile 重命名正在运行的程序文件（如 p2p.exe → p2p.exe~）
+		// RenameRunningFile 重命名正在运行的程序文件（如 message.exe → message.exe~）
 		RenameRunningFile(exePath string) (string, error)
 	}
 )

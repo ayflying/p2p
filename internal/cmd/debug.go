@@ -54,7 +54,7 @@ var (
 				}
 				msg = res.Export()
 				g.Dump(res.ToNumber())
-			case "p2p":
+			case "message":
 			// host, err := service.P2P().Start(ctx)
 			// if err != nil {
 			// 	break
@@ -102,9 +102,9 @@ var (
 	}
 )
 
-// 重命名正在运行的程序文件（如 p2p.exe → p2p.exe~）
+// 重命名正在运行的程序文件（如 message.exe → message.exe~）
 func renameRunningFile(exePath string) (string, error) {
-	// 目标备份文件名（p2p.exe → p2p.exe~）
+	// 目标备份文件名（message.exe → message.exe~）
 	backupPath := exePath + "~"
 
 	// 先删除已存在的备份文件（若有）

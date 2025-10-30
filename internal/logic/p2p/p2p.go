@@ -26,7 +26,7 @@ var (
 
 // 常量定义
 const (
-	ProtocolID string = "/ay/p2p/1.0.0"
+	ProtocolID string = "/ay/message/1.0.0"
 	//DefaultPort        = 51888
 )
 
@@ -62,6 +62,7 @@ type sP2P struct {
 	dht     *DHTType
 	privKey crypto.PrivKey
 	client  *Client
+	IdLock  map[string]sync.Mutex
 }
 
 // New 创建一个新的 P2P 服务实例
@@ -189,7 +190,7 @@ func (s *sP2P) removeDuplicates(strs []string) []string {
 
 // 生成固定密钥（核心：通过固定种子生成相同密钥）
 func (s *sP2P) generateFixedKey() (crypto.PrivKey, error) {
-	privKeyPath := "runtime/p2p.key"
+	privKeyPath := "runtime/message.key"
 	if ok := gfile.Exists(privKeyPath); ok {
 		// 从文件读取密钥
 		keyBytes := gfile.GetBytes(privKeyPath)

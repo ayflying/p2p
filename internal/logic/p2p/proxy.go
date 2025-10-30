@@ -2,6 +2,7 @@ package p2p
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
@@ -16,22 +17,50 @@ type ProxyType struct {
 }
 
 func (s *sP2P) ProxyInit() {
-	type cfgType struct {
+	type tcpCfgType struct {
 		Key       string `json:"key"`
 		Ip        string `json:"ip"`
 		Port      int    `json:"port"`
 		LocalPort int    `json:"local_port"`
 	}
-	var cfgList []*cfgType
-	proxyCfg, err := g.Cfg("proxy").Get(gctx.New(), "tcp")
+	var tcpCfgList []*tcpCfgType
+	tcpCfg, err := g.Cfg("proxy").Get(gctx.New(), "tcp")
 	if err == nil {
-		proxyCfg.Scan(&cfgList)
-		for _, v := range cfgList {
+		tcpCfg.Scan(&tcpCfgList)
+		for _, v := range tcpCfgList {
 			go s.Tcp(v.Key, v.Port, v.LocalPort, v.Ip)
-
+			time.Sleep(2 * time.Second)
 		}
 	}
 
+	time.Sleep(1 * time.Second)
+	type httpCfgType struct {
+		Key   string `json:"key"`
+		Ip    string `json:"ip"`
+		Port  int    `json:"port"`
+		Cname string `json:"cname"`
+	}
+	var httpCfgList []*httpCfgType
+	httpCfg, err := g.Cfg("proxy").Get(gctx.New(), "tcp")
+	if err == nil {
+		httpCfg.Scan(&httpCfgList)
+		for _, v := range httpCfgList {
+			go s.Http(v.Key, v.Cname, v.Port, v.Ip)
+			time.Sleep(2 * time.Second)
+		}
+	}
+
+}
+
+var TcpList = make(map[int]*gtcp.Conn)
+
+func (s *sP2P) TcpAck(port int) *gtcp.Conn {
+	if v, ok := TcpList[port]; ok {
+		return v
+	} else {
+		g.Log().Errorf(gctx.New(), "端口:%v不存在", port)
+		return nil
+	}
 }
 
 func (s *sP2P) Tcp(key string, toPort, myPort int, ip string) {
@@ -42,16 +71,20 @@ func (s *sP2P) Tcp(key string, toPort, myPort int, ip string) {
 	// 建立p2p连接
 	err := s.DiscoverAndConnect(key)
 	if err != nil {
-
+		g.Log().Errorf(gctx.New(), "连接失败:%v", err)
+		time.Sleep(3 * time.Second)
+		s.Tcp(key, toPort, myPort, ip)
+		return
 	}
 	err = gtcp.NewServer(fmt.Sprintf("0.0.0.0:%d", myPort), func(conn *gtcp.Conn) {
+		TcpList[toPort] = conn
 		defer conn.Close()
 		for {
 			ctx := gctx.New()
 			data, err := conn.Recv(-1)
 
 			if len(data) > 0 {
-				g.Log().Debugf(gctx.New(), "内容:%v", string(data))
+				g.Log().Debugf(gctx.New(), "本地接口收到内容:%v", string(data))
 				err = s.SendP2P(key, "proxy", gjson.MustEncode(&ProxyType{
 					Ip:   ip,
 					Port: toPort,
@@ -73,6 +106,22 @@ func (s *sP2P) Tcp(key string, toPort, myPort int, ip string) {
 	}).Run()
 	if err != nil {
 		g.Log().Error(gctx.New(), err)
+	}
+
+}
+
+func (s *sP2P) Http(key string, cname string, toPort int, ip string) {
+	if toPort == 0 {
+		toPort = 80
+	}
+
+	// 建立p2p连接
+	err := s.DiscoverAndConnect(key)
+	if err != nil {
+		g.Log().Errorf(gctx.New(), "连接失败:%v", err)
+		time.Sleep(3 * time.Second)
+		s.Http(key, cname, toPort, ip)
+		return
 	}
 
 }

@@ -77,9 +77,9 @@ func (s *sSystem) RestartSelf() error {
 	return nil // 理论上不会执行到这里
 }
 
-// RenameRunningFile 重命名正在运行的程序文件（如 p2p.exe → p2p.exe~）
+// RenameRunningFile 重命名正在运行的程序文件（如 message.exe → message.exe~）
 func (s *sSystem) RenameRunningFile(exePath string) (string, error) {
-	// 目标备份文件名（p2p.exe → p2p.exe~）
+	// 目标备份文件名（message.exe → message.exe~）
 	backupPath := exePath + "~"
 
 	// 先删除已存在的备份文件（若有）
