@@ -16,11 +16,11 @@ require (
 	github.com/libp2p/go-libp2p-kad-dht v0.35.1
 	github.com/multiformats/go-multiaddr v0.16.1
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+	github.com/ayflying/update-github-release v0.0.3
 )
 
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
-	github.com/ayflying/update-github-release v0.0.2 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

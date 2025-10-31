@@ -23,7 +23,7 @@ func init() {
 
 		// 每天0点检查更新
 		gcron.Add(gctx.New(), "0 0 0 * * *", func(ctx context.Context) {
-			err := update.CheckUpdate()
+			err := update.CheckUpdate(true)
 			if err != nil {
 				g.Log().Errorf(ctx, "检查更新失败：%v", err)
 			}
@@ -31,7 +31,7 @@ func init() {
 
 		go func() {
 			//在协程中检查更新，预防主程序阻塞
-			err := update.CheckUpdate()
+			err := update.CheckUpdate(true)
 			if err != nil {
 				g.Log().Errorf(gctx.New(), "检查更新失败：%v", err)
 			}

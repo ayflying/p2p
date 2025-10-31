@@ -12,6 +12,7 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gfile"
+	"github.com/gogf/gf/v2/os/gres"
 )
 
 // 引入 Windows API 函数
@@ -20,6 +21,9 @@ var (
 	kernel32      = syscall.NewLazyDLL("kernel32.dll")
 	showWindow    = user32.NewProc("ShowWindow")
 	getConsoleWnd = kernel32.NewProc("GetConsoleWindow")
+	freeConsole   = kernel32.NewProc("FreeConsole")
+	attachConsole = kernel32.NewProc("AttachConsole")
+	allocConsole  = kernel32.NewProc("AllocConsole")
 )
 
 func (s *sOS) start() {
@@ -30,9 +34,21 @@ func (s *sOS) start() {
 
 // 系统托盘初始化（设置图标、右键菜单）
 func (s *sOS) onSystrayReady() {
-	//s.hideConsole()
+	s.hideConsole()
+	var iconByte []byte
+	if !gfile.Exists(s.systray.Icon) {
+		iconByte = gres.GetContent(s.systray.Icon)
+		gfile.PutBytes(s.systray.Icon, iconByte)
+	}
+	iconByte = gfile.GetBytes(s.systray.Icon)
 
-	iconByte := gfile.GetBytes(s.systray.Icon)
+	//if gres.Contains(s.systray.Icon) {
+	//	iconByte = gres.GetContent(s.systray.Icon)
+	//	gfile.PutBytes(s.systray.Icon, iconByte)
+	//} else {
+	//	iconByte = gfile.GetBytes(s.systray.Icon)
+	//}
+
 	systray.SetIcon(iconByte)
 	systray.SetTitle(s.systray.Title)
 	systray.SetTooltip(s.systray.Tooltip)
@@ -46,6 +62,7 @@ func (s *sOS) onSystrayReady() {
 			select {
 			case <-mQuit.ClickedCh:
 				systray.Quit()
+
 			case <-mShow.ClickedCh:
 				// 显示窗口
 				s.showConsole()
@@ -77,13 +94,14 @@ func (s *sOS) update(version, server string) {
 
 // 隐藏控制台窗口
 func (s *sOS) hideConsole() {
-	// 获取当前控制台窗口句柄
+	// 彻底脱离控制台，避免仅最小化
+	freeConsole.Call()
+	// 获取当前控制台窗口句柄并隐藏窗口
 	hWnd, _, _ := getConsoleWnd.Call()
-	if hWnd == 0 {
-		return // 无控制台窗口（如编译为GUI子系统时）
+	if hWnd != 0 {
+		// SW_HIDE = 0：隐藏窗口
+		showWindow.Call(hWnd, 0)
 	}
-	// SW_HIDE = 0：隐藏窗口
-	showWindow.Call(hWnd, 0)
 }
 
 // 显示控制台窗口
@@ -91,8 +109,18 @@ func (s *sOS) showConsole() {
 	// 获取当前控制台窗口句柄
 	hWnd, _, _ := getConsoleWnd.Call()
 	if hWnd == 0 {
-		return
+		// 如果当前进程没有控制台，尝试附加到父进程控制台
+		// ATTACH_PARENT_PROCESS = (DWORD)-1
+		ret, _, _ := attachConsole.Call(uintptr(^uint32(0)))
+		if ret == 0 {
+			// 附加失败则分配一个新的控制台窗口
+			allocConsole.Call()
+		}
+		// 重新获取控制台窗口句柄
+		hWnd, _, _ = getConsoleWnd.Call()
 	}
-	// SW_SHOW = 5：显示窗口
-	showWindow.Call(hWnd, 5)
+	if hWnd != 0 {
+		// SW_SHOW = 5：显示窗口
+		showWindow.Call(hWnd, 5)
+	}
 }

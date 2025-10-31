@@ -17,6 +17,8 @@ github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYr
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/ayflying/update-github-release v0.0.2 h1:pZ2W0VKagBsJ5OsrREfniy/0fE70nbU8dJU7TtpzY0w=
 github.com/ayflying/update-github-release v0.0.2/go.mod h1:9ctXuagiEKABWLaS4ocRCUcnN77jdYm7zir7NQ+rIeM=
+github.com/ayflying/update-github-release v0.0.3 h1:Tba83oXcs0ufU9fMGrGRGXai96F9LUwSYrl7qMgAruk=
+github.com/ayflying/update-github-release v0.0.3/go.mod h1:9ctXuagiEKABWLaS4ocRCUcnN77jdYm7zir7NQ+rIeM=
 github.com/benbjohnson/clock v1.3.5 h1:VvXlSJBzZpA/zum6Sj74hxwYI2DIxRWuNIoXAzHZz5o=
 github.com/benbjohnson/clock v1.3.5/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
