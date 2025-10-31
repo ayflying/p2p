@@ -78,6 +78,8 @@ func (s *sSystem) Update(ctx context.Context, gzFile string) (err error) {
 	if err != nil {
 		return
 	}
+	//修改文件权限为755
+	err = gfile.Chmod(runFile, 0755)
 
 	go func() {
 		log.Println("5秒后开始重启...")
