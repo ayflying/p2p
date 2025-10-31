@@ -34,10 +34,10 @@ redis:
 
 p2p:
   list:
-#    - host: "192.168.50.173"
-#      port: 51888
-#      ssl: false
-#      ws: ws
+    - host: "host.yunloli.cn"
+      port: 51888
+      ssl: false
+      ws: ws
     - host: "ay.cname.com"
       port: 51888
       ssl: false

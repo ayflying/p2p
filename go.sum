@@ -15,6 +15,8 @@ github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9/go.mod 
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
+github.com/ayflying/update-github-release v0.0.2 h1:pZ2W0VKagBsJ5OsrREfniy/0fE70nbU8dJU7TtpzY0w=
+github.com/ayflying/update-github-release v0.0.2/go.mod h1:9ctXuagiEKABWLaS4ocRCUcnN77jdYm7zir7NQ+rIeM=
 github.com/benbjohnson/clock v1.3.5 h1:VvXlSJBzZpA/zum6Sj74hxwYI2DIxRWuNIoXAzHZz5o=
 github.com/benbjohnson/clock v1.3.5/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
@@ -102,6 +104,8 @@ github.com/gogf/gf/contrib/nosql/redis/v2 v2.9.3 h1:VTbeHq8XpBCWFIwBGmuBl+jP8Aep
 github.com/gogf/gf/contrib/nosql/redis/v2 v2.9.3/go.mod h1:gcidgAYn4IWbx08QUThg7jw6bz3KklXI9/5zg8jnVHY=
 github.com/gogf/gf/v2 v2.9.3 h1:qjN4s55FfUzxZ1AE8vUHNDX3V0eIOUGXhF2DjRTVZQ4=
 github.com/gogf/gf/v2 v2.9.3/go.mod h1:w6rcfD13SmO7FKI80k9LSLiSMGqpMYp50Nfkrrc2sEE=
+github.com/gogf/gf/v2 v2.9.4 h1:6vleEWypot9WBPncP2GjbpgAUeG6Mzb1YESb9nPMkjY=
+github.com/gogf/gf/v2 v2.9.4/go.mod h1:Ukl+5HUH9S7puBmNLR4L1zUqeRwi0nrW4OigOknEztU=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/lint v0.0.0-20180702182130-06c8688daad7/go.mod h1:tluoj9z5200jBnyusfRPU2LqT6J+DAorxEvtC7LHB+E=
@@ -283,6 +287,8 @@ github.com/olekukonko/ll v0.1.1 h1:9Dfeed5/Mgaxb9lHRAftLK9pVfYETvHn+If6lywVhJc=
 github.com/olekukonko/ll v0.1.1/go.mod h1:2dJo+hYZcJMLMbKwHEWvxCUbAOLc/CXWS9noET22Mdo=
 github.com/olekukonko/tablewriter v1.0.9 h1:XGwRsYLC2bY7bNd93Dk51bcPZksWZmLYuaTHR0FqfL8=
 github.com/olekukonko/tablewriter v1.0.9/go.mod h1:5c+EBPeSqvXnLLgkm9isDdzR3wjfBkHR9Nhfp3NWrzo=
+github.com/olekukonko/tablewriter v1.1.0 h1:N0LHrshF4T39KvI96fn6GT8HEjXRXYNDrDjKFDB7RIY=
+github.com/olekukonko/tablewriter v1.1.0/go.mod h1:5c+EBPeSqvXnLLgkm9isDdzR3wjfBkHR9Nhfp3NWrzo=
 github.com/openzipkin/zipkin-go v0.1.1/go.mod h1:NtoC/o8u3JlF1lSlyPNswIbeQH9bJTmOf0Erfk+hxe8=
 github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c h1:rp5dCmg/yLR3mgFuSOe4oEnDDmGLROTvMragMUXpTQw=
 github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c/go.mod h1:X07ZCGwUbLaax7L0S3Tw4hpejzu63ZrrQiUe6W0hcy0=

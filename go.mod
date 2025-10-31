@@ -1,13 +1,15 @@
 module github.com/ayflying/p2p
 
-go 1.24.0
+go 1.24.8
+
+toolchain go1.24.9
 
 require (
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
 	github.com/getlantern/systray v1.2.2
 	github.com/gogf/gf/contrib/nosql/redis/v2 v2.9.3
-	github.com/gogf/gf/v2 v2.9.3
+	github.com/gogf/gf/v2 v2.9.4
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/libp2p/go-libp2p v0.43.0
@@ -18,6 +20,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
+	github.com/ayflying/update-github-release v0.0.2 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -97,7 +100,7 @@ require (
 	github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6 // indirect
 	github.com/olekukonko/errors v1.1.0 // indirect
 	github.com/olekukonko/ll v0.1.1 // indirect
-	github.com/olekukonko/tablewriter v1.0.9 // indirect
+	github.com/olekukonko/tablewriter v1.1.0 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
