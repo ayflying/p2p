@@ -178,6 +178,7 @@ func (s *sP2P) register() error {
 		addrs[i] = addr.String()
 	}
 
+	ports, _ := s.getLocalTCPPorts(s.client.host)
 	// 构建注册消息
 	msg := GatewayMessage{
 		Type: MsgTypeRegister,
@@ -185,6 +186,7 @@ func (s *sP2P) register() error {
 		Data: gjson.MustEncode(g.Map{
 			"peer_id": s.client.host.ID().String(),
 			"addrs":   addrs,
+			"ports":   ports,
 		}),
 	}
 

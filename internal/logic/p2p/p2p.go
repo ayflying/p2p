@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
-	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -78,46 +77,6 @@ func New() *sP2P {
 func init() {
 	service.RegisterP2P(New())
 	ip, _ = service.P2P().GetIPv4PublicIP()
-}
-
-// 获取公网IP并判断类型（ipv4/ipv6）
-func (s *sP2P) getPublicIPAndType() (ip string, ipType string, err error) {
-	// 公网IP查询接口（多个备用）
-
-	client := http.Client{Timeout: 5 * time.Second}
-	for _, api := range ipAPIs {
-		resp, err := client.Get(api)
-		if err != nil {
-			continue
-		}
-		defer resp.Body.Close()
-
-		// 读取响应（纯IP字符串）
-		buf := make([]byte, 128)
-		n, err := resp.Body.Read(buf)
-		if err != nil {
-			continue
-		}
-
-		ip = strings.TrimSpace(string(buf[:n]))
-		if ip == "" {
-			continue
-		}
-
-		// 判断IP类型
-		parsedIP := net.ParseIP(ip)
-		if parsedIP == nil {
-			continue // 无效IP格式
-		}
-
-		if parsedIP.To4() != nil {
-			return ip, "ipv4", nil // IPv4
-		} else if parsedIP.To16() != nil {
-			return ip, "ipv6", nil // IPv6
-		}
-	}
-
-	return "", "", fmt.Errorf("所有公网IP查询接口均失败")
 }
 
 // 只获取IPv4公网IP（过滤IPv6结果）

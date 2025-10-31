@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -104,6 +105,7 @@ func (s *sP2P) handleRegister(ctx context.Context, conn *websocket.Conn, msg *Ga
 	var data struct {
 		PeerID string   `json:"peer_id"`
 		Addrs  []string `json:"addrs"`
+		Ports  []int    `json:"ports"`
 	}
 
 	if err := json.Unmarshal(msg.Data, &data); err != nil {
@@ -111,18 +113,20 @@ func (s *sP2P) handleRegister(ctx context.Context, conn *websocket.Conn, msg *Ga
 		return
 	}
 
-	//// 追加公网ip
-	//publicIp, _, _ := net.SplitHostPort(conn.RemoteAddr().String())
-	//ParseIP := net.ParseIP(publicIp)
-	//var ipType string
-	//if ParseIP.To4() != nil {
-	//	ipType = "ip4"
-	//} else {
-	//	ipType = "ip6"
-	//}
+	// 追加公网ip
+	publicIp, _, _ := net.SplitHostPort(conn.RemoteAddr().String())
+	ParseIP := net.ParseIP(publicIp)
+	var ipType string
+	if ParseIP.To4() != nil {
+		ipType = "ip4"
+	} else {
+		ipType = "ip6"
+	}
 	//port2 := 53533
-	//data.Addrs = append(data.Addrs, fmt.Sprintf("/%s/%s/tcp/%d", ipType, publicIp, port2))
-	//data.Addrs = append(data.Addrs, fmt.Sprintf("/%s/%s/udp/%d/quic-v1", ipType, publicIp, port2))
+	for _, port2 := range data.Ports {
+		data.Addrs = append(data.Addrs, fmt.Sprintf("/%s/%s/tcp/%d", ipType, publicIp, port2))
+		data.Addrs = append(data.Addrs, fmt.Sprintf("/%s/%s/udp/%d/quic-v1", ipType, publicIp, port2))
+	}
 
 	// 过滤回环地址
 	data.Addrs = s.filterLoopbackAddrs(data.Addrs)
