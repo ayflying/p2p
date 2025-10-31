@@ -3,7 +3,6 @@ package system
 import (
 	"context"
 
-	"github.com/ayflying/p2p/internal/service"
 	updateGithub "github.com/ayflying/update-github-release"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcron"
@@ -17,7 +16,6 @@ func New() *sSystem {
 }
 
 func init() {
-	service.RegisterSystem(New())
 
 	getDev, _ := g.Cfg().GetWithEnv(gctx.New(), "dev")
 	if !getDev.Bool() {

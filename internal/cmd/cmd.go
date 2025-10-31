@@ -7,7 +7,6 @@ import (
 
 	"github.com/ayflying/p2p/internal/consts"
 	"github.com/ayflying/p2p/internal/controller/p2p"
-	"github.com/ayflying/p2p/internal/controller/system"
 	"github.com/ayflying/p2p/internal/service"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -18,7 +17,7 @@ import (
 )
 
 func init() {
-	err := Main.AddCommand(&Main, &Debug, &Update)
+	err := Main.AddCommand(&Main, &Debug)
 	if err != nil {
 		g.Log().Error(gctx.GetInitCtx(), err)
 		return
@@ -69,7 +68,6 @@ var (
 				group.Middleware(ghttp.MiddlewareHandlerResponse)
 				group.Bind(
 					p2p.NewV1(),
-					system.NewV1(),
 				)
 			})
 
