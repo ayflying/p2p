@@ -20,3 +20,5 @@ v1.0.0/
 config/local.yaml
 main.exe~
 download/
+version.txt
+internal/packed/build_pack_data.go

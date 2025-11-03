@@ -11,7 +11,7 @@ import (
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/gtime"
 	//步骤1：加载驱动
-	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
+	//_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
 	"github.com/ayflying/p2p/internal/cmd"
 	"github.com/gogf/gf/v2/os/gctx"

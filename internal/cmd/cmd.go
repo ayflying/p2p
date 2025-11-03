@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ayflying/p2p/internal/boot"
 	"github.com/ayflying/p2p/internal/consts"
 	"github.com/ayflying/p2p/internal/controller/p2p"
 	"github.com/ayflying/p2p/internal/service"
@@ -31,6 +32,10 @@ var (
 		Brief: "start http server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			g.Log().Debug(ctx, "开始执行main")
+
+			// 初始化服务器
+			boot.Boot()
+
 			Version, err := g.Cfg("hack").Get(ctx, "gfcli.build.version")
 			g.Log().Debugf(ctx, "当前启动的版本为：%v", Version)
 
