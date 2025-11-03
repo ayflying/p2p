@@ -7,7 +7,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcron"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/os/gfile"
 )
 
 func Boot() {
@@ -15,8 +14,6 @@ func Boot() {
 	getDev, _ := g.Cfg().GetWithEnv(gctx.New(), "dev")
 	if !getDev.Bool() {
 		var update = updateGithub.New("https://api.github.com/repos/ayflying/p2p/releases/latest")
-		gfile.PutContents("version.txt", "v0.0.9")
-
 		// 每天0点检查更新
 		gcron.Add(gctx.New(), "0 0 0 * * *", func(ctx context.Context) {
 			err := update.CheckUpdate(true)
