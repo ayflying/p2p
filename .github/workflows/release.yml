@@ -39,7 +39,7 @@ jobs:
         run: gf build -ew -v "${{ github.ref_name }}"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: p2p-${{ github.ref_name }}
           path: |
@@ -50,10 +50,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: p2p-${{ github.ref_name }}
           path: bin
