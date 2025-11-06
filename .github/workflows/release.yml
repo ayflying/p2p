@@ -23,15 +23,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4  # 使用最新稳定的v4版本
 
+      - name: Cache Go installation
+        uses: actions/cache@v4
+        id: cache-go
+        with:
+          path: |
+            ~/.go
+            /usr/local/go
+          key: go-installation-${{ runner.os }}-${{ hashFiles('.github/workflows/release.yml') }}
+          restore-keys: |
+            go-installation-${{ runner.os }}-
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: 'stable'  # 使用最新稳定版本的Go，无需手动更新版本号
+          cache: true  # 启用Go模块缓存
+          cache-dependency-path: go.sum  # 使用go.sum作为缓存键的一部分
+
+      - name: Cache GF CLI
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/gf
+          key: gf-cli-${{ hashFiles('**/go.mod') }}
+          restore-keys: gf-cli-
 
       - name: Install gf CLI
         run: |
-          curl -L -o gf https://github.com/gogf/gf/releases/latest/download/gf_linux_amd64
-          chmod +x gf
+          # 如果缓存中已有gf CLI，直接复制到bin目录，否则下载
+          if [ -f "${{ github.workspace }}/gf" ]; then
+            echo "Using cached GF CLI"
+            chmod +x "${{ github.workspace }}/gf"
+          else
+            echo "Downloading GF CLI"
+            curl -L -o gf https://github.com/gogf/gf/releases/latest/download/gf_linux_amd64
+            chmod +x gf
+          fi
           mkdir -p "$HOME/bin"
           mv gf "$HOME/bin/gf"
           echo "$HOME/bin" >> $GITHUB_PATH
