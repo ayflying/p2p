@@ -44,17 +44,8 @@ jobs:
       - name: Build with gf
         run: gf build -ew -v "${{ github.ref_name }}"
 
-      - name: Upload build artifacts (GitHub)
-        if: contains(github.server_url, 'github.com')
-        uses: actions/upload-artifact@v4  # GitHub使用v4版本以避免废弃警告
-        with:
-          name: p2p-${{ github.ref_name }}
-          path: |
-            bin/**
-      
-      - name: Upload build artifacts (Gitea)
-        if: ${{ github.server_url != 'https://github.com' || env.GITEA_ACTIONS == 'true' }}
-        uses: actions/upload-artifact@v3  # Gitea使用v3版本以兼容GHES
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4  # 使用v4版本
         with:
           name: p2p-${{ github.ref_name }}
           path: |
@@ -71,16 +62,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download artifacts (GitHub)
-        if: contains(github.server_url, 'github.com')
-        uses: actions/download-artifact@v4  # GitHub使用v4版本以避免废弃警告
-        with:
-          name: p2p-${{ github.ref_name }}
-          path: bin
-      
-      - name: Download artifacts (Gitea)
-        if: contains(github.server_url, 'gitea')
-        uses: actions/download-artifact@v3  # Gitea使用v3版本以兼容GHES
+      - name: Download artifacts
+        uses: actions/download-artifact@v4  # 使用v4版本
         with:
           name: p2p-${{ github.ref_name }}
           path: bin
