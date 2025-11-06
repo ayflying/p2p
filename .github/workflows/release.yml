@@ -23,42 +23,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4  # 使用最新稳定的v4版本
 
-      - name: Cache Go installation
-        uses: actions/cache@v4
-        id: cache-go
-        with:
-          path: |
-            ~/.go
-            /usr/local/go
-          key: go-installation-${{ runner.os }}-${{ hashFiles('.github/workflows/release.yml') }}
-          restore-keys: |
-            go-installation-${{ runner.os }}-
-
+      # GitHub Actions的runner环境通常已预装Go，Setup Go步骤会处理版本管理
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: 'stable'  # 使用最新稳定版本的Go，无需手动更新版本号
-          cache: true  # 启用Go模块缓存
-          cache-dependency-path: go.sum  # 使用go.sum作为缓存键的一部分
-
-      - name: Cache GF CLI
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/gf
-          key: gf-cli-${{ hashFiles('**/go.mod') }}
-          restore-keys: gf-cli-
-
       - name: Install gf CLI
         run: |
-          # 如果缓存中已有gf CLI，直接复制到bin目录，否则下载
-          if [ -f "${{ github.workspace }}/gf" ]; then
-            echo "Using cached GF CLI"
-            chmod +x "${{ github.workspace }}/gf"
-          else
-            echo "Downloading GF CLI"
-            curl -L -o gf https://github.com/gogf/gf/releases/latest/download/gf_linux_amd64
-            chmod +x gf
-          fi
+          # 直接下载GF CLI，不使用缓存以避免超时问题
+          echo "Downloading GF CLI"
+          curl -L -o gf https://github.com/gogf/gf/releases/latest/download/gf_linux_amd64
+          chmod +x gf
           mkdir -p "$HOME/bin"
           mv gf "$HOME/bin/gf"
           echo "$HOME/bin" >> $GITHUB_PATH
@@ -69,9 +44,17 @@ jobs:
       - name: Build with gf
         run: gf build -ew -v "${{ github.ref_name }}"
 
-      - name: Upload build artifacts
-        # 使用main分支以获取最新版本的action，无需手动更新版本号
-        uses: actions/upload-artifact@main
+      - name: Upload build artifacts (GitHub)
+        if: contains(github.server_url, 'github.com')
+        uses: actions/upload-artifact@v4  # GitHub使用v4版本以避免废弃警告
+        with:
+          name: p2p-${{ github.ref_name }}
+          path: |
+            bin/**
+      
+      - name: Upload build artifacts (Gitea)
+        if: ${{ github.server_url != 'https://github.com' || env.GITEA_ACTIONS == 'true' }}
+        uses: actions/upload-artifact@v3  # Gitea使用v3版本以兼容GHES
         with:
           name: p2p-${{ github.ref_name }}
           path: |
@@ -88,9 +71,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download artifacts
-        # 使用main分支以获取最新版本的action，无需手动更新版本号
-        uses: actions/download-artifact@main
+      - name: Download artifacts (GitHub)
+        if: contains(github.server_url, 'github.com')
+        uses: actions/download-artifact@v4  # GitHub使用v4版本以避免废弃警告
+        with:
+          name: p2p-${{ github.ref_name }}
+          path: bin
+      
+      - name: Download artifacts (Gitea)
+        if: contains(github.server_url, 'gitea')
+        uses: actions/download-artifact@v3  # Gitea使用v3版本以兼容GHES
         with:
           name: p2p-${{ github.ref_name }}
           path: bin
