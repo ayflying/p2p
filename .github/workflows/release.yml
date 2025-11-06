@@ -14,15 +14,18 @@ permissions:
 
 jobs:
   build:
+    # runs-on指定了运行作业的虚拟机环境类型
+    # 即使使用container，runs-on仍然是必要的配置
     runs-on: ubuntu-latest
+    # 在runner上运行golang容器
+    container:
+      # 使用最新版本的golang镜像，无需指定具体版本号
+      image: golang:latest-alpine
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.24.x'
+      # Go environment is already provided by the container image
 
       - name: Install gf CLI
         run: |
@@ -47,10 +50,16 @@ jobs:
 
   release:
     needs: build
+    # runs-on指定了运行作业的虚拟机环境类型
+    # 即使使用container，runs-on仍然是必要的配置
     runs-on: ubuntu-latest
+    # 在runner上运行golang容器
+    container:
+      # 使用最新版本的golang镜像，无需指定具体版本号
+      image: golang:latest-alpine
     steps:
       - name: Checkout
-        uses: actions/checkout@
+        uses: actions/checkout@v4
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
