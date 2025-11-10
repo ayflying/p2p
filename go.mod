@@ -5,7 +5,7 @@ go 1.24.8
 toolchain go1.24.9
 
 require (
-	github.com/ayflying/update-github-release v0.0.4
+	github.com/ayflying/update-github-release v0.0.5
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
 	github.com/getlantern/systray v1.2.2
 	github.com/gogf/gf/v2 v2.9.4
