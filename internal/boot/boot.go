@@ -14,7 +14,6 @@ func Boot() {
 	getDev, _ := g.Cfg().GetWithEnv(gctx.New(), "dev")
 	if !getDev.Bool() {
 		url := "https://api.github.com/repos/ayflying/p2p/releases/latest"
-		url = "https://gh-proxy.com/" + url
 		var update = updateGithub.New(url)
 		// 每天0点检查更新
 		gcron.Add(gctx.New(), "0 0 0 * * *", func(ctx context.Context) {
